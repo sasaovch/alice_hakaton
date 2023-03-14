@@ -58,6 +58,7 @@ class MainScenario (
                 } else if (type == null) {
                     reactions.say("Пожалуйста, уточните: вам нужна переговорка или аудитория?")
                 } else {
+                    reactions.say("Окей, бронирую")
                     println(activator.alice?.slots)
 
                     val responce = requestHandler.handleRequest(place.toString(), time.toString(), date.toString(), type.toString())
@@ -113,18 +114,62 @@ class MainScenario (
                 }
 
                 action {
-                    val date = activator.alice?.slots?.get("date").toString()
+                    reactions.say("стейт спросить про дату") // TODO remove
+                    val date = activator.alice?.slots?.get("date")?.value
 
-                    val responce = requestHandler.handleRequestDate(date)
+                    val responce = requestHandler.handleRequestDate(date.toString())
                     when (responce.error) {
                         ErrorTypeResponce.NO_DATE -> reactions.say("ask_place")
                         ErrorTypeResponce.SUCCESS -> reactions.say(
                             "Юзер хочет забронировать на месте ${date?.toString() ?: "null"} "
                         )
                     }
+
+                    reactions.go("/main_book")
                 }
             }
 
+            state("ask_time") {
+                activators {
+                    intent("ask_time")
+                }
+
+                action {
+                    reactions.say("стейт спросить про время") // TODO remove
+                    val time = activator.alice?.slots?.get("time").toString()
+
+                    val responce = requestHandler.handleRequestTime(time)
+                    when (responce.error) {
+                        ErrorTypeResponce.NO_TIME -> reactions.say("ask_place")
+                        ErrorTypeResponce.SUCCESS -> reactions.say(
+                            "Юзер хочет забронировать на месте ${time?.toString() ?: "null"} "
+                        )
+                    }
+
+                    reactions.go("/main_book")
+                }
+
+            }
+
+            state("ask_type") {
+                activators {
+                    intent("ask_type")
+                }
+
+                action {
+                    val type = activator.alice?.slots?.get("place").toString()
+
+                    val responce = requestHandler.handleRequestType(type)
+                    when (responce.error) {
+                        ErrorTypeResponce.NO_TYPE -> reactions.say("ask_place")
+                        ErrorTypeResponce.SUCCESS -> reactions.say(
+                            "Юзер хочет забронировать на месте ${type?.toString() ?: "null"} "
+                        )
+                    }
+
+                    reactions.go("/main_book")
+                }
+            }
 
         }
 
@@ -134,41 +179,9 @@ class MainScenario (
 
 
 
-        state("ask_time") {
-            activators {
-                intent("time")
-            }
 
-            action {
-                val time = activator.alice?.slots?.get("time").toString()
 
-                val responce = requestHandler.handleRequestTime(time)
-                when (responce.error) {
-                    ErrorTypeResponce.NO_TIME -> reactions.say("ask_place")
-                    ErrorTypeResponce.SUCCESS -> reactions.say(
-                        "Юзер хочет забронировать на месте ${time?.toString() ?: "null"} "
-                    )
-                }
-            }
-        }
 
-        state("ask_type") {
-            activators {
-                intent("type")
-            }
-
-            action {
-                val type = activator.alice?.slots?.get("place").toString()
-
-                val responce = requestHandler.handleRequestType(type)
-                when (responce.error) {
-                    ErrorTypeResponce.NO_TYPE -> reactions.say("ask_place")
-                    ErrorTypeResponce.SUCCESS -> reactions.say(
-                        "Юзер хочет забронировать на месте ${type?.toString() ?: "null"} "
-                    )
-                }
-            }
-        }
 
         fallback {
             reactions.say("Не распарсилось")
