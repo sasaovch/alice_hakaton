@@ -2,28 +2,43 @@ package com.example.handler
 
 import com.example.api_service.InfoHandler
 import com.example.models.*
-import java.sql.Date
 import java.time.Month
+import java.util.*
 
 class RequestHandler {
-    fun handleRequest(place: String, time: String, month: String, day: String, type: String): RoomResponce {
-        val placeToBook: Place = Place.parseVal(place)
-        val dateToBook: Date? = parseDate(month, day)
-        val timeToBook: Pair<Int, Int>? = parseTime(time)
-        val typeToBook: RoomType = RoomType.parseVal(type)
-        if (placeToBook != Place.NONE && timeToBook != null && dateToBook != null && typeToBook != RoomType.NONE) {
-            val roomList = InfoHandler.getFreeRoomByDateAndTime(Room(placeToBook, timeToBook, dateToBook, typeToBook))
-            return RoomResponce(roomList, ErrorTypeResponce.SUCCESS)
-        } else if (placeToBook == Place.NONE) {
-            return RoomResponce(emptyList(), ErrorTypeResponce.NO_PLACE)
-        } else if (timeToBook == null) {
-            return RoomResponce(emptyList(), ErrorTypeResponce.NO_TIME)
-        } else if (dateToBook == null) {
-            return RoomResponce(emptyList(), ErrorTypeResponce.NO_DATE)
-        } else if (typeToBook == RoomType.NONE) {
-            return RoomResponce(emptyList(), ErrorTypeResponce.NO_TYPE)
-        }
-        return RoomResponce(emptyList(), ErrorTypeResponce.NO_PLACE);
+    val infoHandler : InfoHandler = InfoHandler;
+    fun makeRequest(place: Place, time: String, date: String, type: RoomType) {
+        infoHandler.checkInstance()
+        val ans = infoHandler.getFreeRooms(place, time, date, type)
+        println(ans)
+        infoHandler.register()
+    }
+    fun handleRequest(place: Place, date: Date, time: Pair<Int, Int>, type: RoomType): RoomResponce {
+//        val placeToBook: Place = Place.parseVal(place)
+//        val dateToBook: Date? = parseDate(month, day)
+//        val timeToBook: Pair<Int, Int>? = parseTime(time)
+//        val typeToBook: RoomType = RoomType.parseVal(type)
+//        if (placeToBook != Place.NONE && timeToBook != null && dateToBook != null && typeToBook != RoomType.NONE) {
+////            val roomList = InfoHandler.getFreeRoomByDateAndTime(Room(placeToBook, timeToBook, dateToBook, typeToBook))
+//
+////            return RoomResponce(roomList, ErrorTypeResponce.SUCCESS)
+//            return RoomResponce(emptyList(), ErrorTypeResponce.SUCCESS)
+//        } else if (placeToBook == Place.NONE) {
+//            return RoomResponce(emptyList(), ErrorTypeResponce.NO_PLACE)
+//        } else if (timeToBook == null) {
+//            return RoomResponce(emptyList(), ErrorTypeResponce.NO_TIME)
+//        } else if (dateToBook == null) {
+//            return RoomResponce(emptyList(), ErrorTypeResponce.NO_DATE)
+//        } else if (typeToBook == RoomType.NONE) {
+//            return RoomResponce(emptyList(), ErrorTypeResponce.NO_TYPE)
+//        }
+//        return RoomResponce(emptyList(), ErrorTypeResponce.NO_PLACE);
+        val timeString = time.first.toString() + ":" + time.second.toString() + "0-" + time.first.toString() + ":" + (time.second + 30).toString()
+        println(timeString)
+        val dateString = date.date.toString() + ".0" + date.month.toString() + "." + "2023"
+        println(dateString)
+        makeRequest(place, timeString, dateString, type)
+        return RoomResponce(emptyList(), ErrorTypeResponce.SUCCESS)
     }
 
     private fun parseTime(strTime: String): Pair<Int, Int>? {

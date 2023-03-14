@@ -1,10 +1,7 @@
 package com.example.alice_bot
 
-import com.example.api_service.InfoHandler
 import com.example.handler.RequestHandler
 import com.example.models.ErrorTypeResponce
-import com.example.models.Place
-import com.example.models.Room
 import com.example.models.RoomResponce
 import com.justai.jaicf.api.BotRequest
 import com.justai.jaicf.channel.yandexalice.activator.alice
@@ -14,13 +11,9 @@ import com.justai.jaicf.channel.yandexalice.model.AliceEvent
 import com.justai.jaicf.context.ActivatorContext
 import com.justai.jaicf.model.scenario.Scenario
 import com.justai.jaicf.reactions.Reactions
-import io.ktor.http.*
-import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import org.json.JSONObject
-import java.sql.Date
 
 class MainScenario (
     private val requestHandler: RequestHandler
@@ -33,7 +26,8 @@ class MainScenario (
             }
 
             action {
-                reactions.sayRandom("Привет! Хотите забронировать аудиторию?",
+                reactions.sayRandom(
+                    "Привет! Хотите забронировать аудиторию?",
                     "Я могу подать заявку на бронь аудитории, также рассказать о доступных вариантах для бронирования.",
                     "Я могу помочь вам в бронировании аудитории, и сказать список доступных на определенный момент времени",
                     "Я могу помочь вам с подбором аудитории"
@@ -130,9 +124,9 @@ class MainScenario (
                     when (response.error) {
                         ErrorTypeResponce.NO_TYPE -> reactions.say("ask_place")
                         ErrorTypeResponce.SUCCESS -> {
-                            saveToSession("type", type.toString(), reactions, request)
+                            saveToSession("type", response.roomList.get(0).type.toString(), reactions, request)
                             reactions.say(
-                                "Поняла вас ${type?.toString() ?: "null"} "
+                                "Поняла вас ${response.roomList.get(0).type} "
                             )
                         }
                     }
@@ -229,8 +223,7 @@ class MainScenario (
         } else {
             reactions.say("Окей, бронирую")
             val response =
-                requestHandler.handleRequest(place.toString(), time.toString(), month.toString(), day.toString(), type.toString())
-//                requestHandler.handleRequest(place.toString(), time.toString(), month.toString(), day.toString(), "переговорка")
+                requestHandler.handleRequest(placeReq.roomList.get(0).place!!, dateReq.roomList.get(0).date!!, timeReq.roomList.get(0).time!!, typeReq.roomList.get(0).type)
             when (response.error) {
                 ErrorTypeResponce.NO_PLACE -> reactions.go("/main_book/say_place")
                 ErrorTypeResponce.NO_DATE -> reactions.go("/main_book/say_date")
