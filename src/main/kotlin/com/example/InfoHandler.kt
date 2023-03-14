@@ -46,7 +46,7 @@ object InfoHandler {
             date
         )
         //no errors handling!
-        parsed = parser.parseSchedule(response.execute().body()?.string(), roomId, date)
+//        parsed = parser.parseSchedule(response.execute().body()?.string(), roomId, date)
 
 
         return parsed

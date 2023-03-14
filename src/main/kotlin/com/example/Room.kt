@@ -5,5 +5,11 @@ data class Room(
     val place: Place?,
     val time: Date?,
     val date: Date?,
-    val roomId: Int?
-)
+) {
+    constructor(
+        place: Place?,
+        time: Date?,
+        date: Date?,
+        roomId: Int?,
+    ) : this(place, time, date)
+}

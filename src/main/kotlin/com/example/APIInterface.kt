@@ -1,4 +1,5 @@
-package com.exampleimport okhttp3.ResponseBody
+package com.example
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*
 

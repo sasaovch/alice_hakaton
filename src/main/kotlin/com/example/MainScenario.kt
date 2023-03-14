@@ -50,7 +50,7 @@ object MainScenario : Scenario() {
                                 "во время ${time?.toString() ?: "null"} " +
                                 "вот это: ${thing?.toString() ?: "null"}"
                     )
-                    reactions.alice.sessionState(JsonObject())
+//                    reactions.alice.sessionState(JsonObject())
                 }
             }
         }
@@ -93,5 +93,6 @@ object MainScenario : Scenario() {
         } else if (dateToBook == null) {
             return RoomResponce(emptyList(), ErrorTypeResponce.NO_DATE)
         }
+        return RoomResponce(emptyList(), ErrorTypeResponce.NO_PLACE);
     }
 }
