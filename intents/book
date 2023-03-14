@@ -1,0 +1,37 @@
+slots:
+    day:
+        type: YANDEX.NUMBER
+        source: $DayNumber
+    month:
+        type: BookTimeMonth
+        source: $Month
+    time:
+        source: $Time
+    type:
+        type: PlaceType
+        source: $Type
+    place:
+        type: ItmoPlace
+        source: $Where
+
+root:
+    %lemma
+    $BookWord ($Type)? [((в | на)? [$DayNumber $Month])? ((в | на)? $Time)? ((в | на)? $Where)?]
+$BookWord:
+    %lemma
+    забронируй | забронь | бронь | подать заявку на бронь
+
+$DayNumber:
+    %lemma
+    $YANDEX.NUMBER
+$Month:
+    $BookTimeMonth
+$Time:
+    %lemma
+    $YANDEX.NUMBER $YANDEX.NUMBER
+$Where:
+    $ItmoPlace
+
+
+$Type:
+    $PlaceType

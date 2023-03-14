@@ -1,0 +1,12 @@
+slots:
+    place:
+        type: ItmoPlace
+        source: $Place
+
+
+root:
+    %lemma
+    (на | в)? $Place
+
+$Place:
+    $ItmoPlace

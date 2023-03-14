@@ -1,0 +1,11 @@
+slots:
+    time:
+        source: $Time
+
+
+root:
+    %lemma
+    (на | в)? $Time
+
+$Time:
+    $YANDEX.NUMBER $YANDEX.NUMBER
