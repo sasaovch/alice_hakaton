@@ -1,8 +1,6 @@
 
 [
 +src/main/kotlin/com/example/APIInterface.kt,9/4/9481e3a7574837fdaabcddcde3f863b873873374
-R
-"src/main/kotlin/com/example/Dev.kt,3/4/34edd4aa7cc08755ea50a01ed42f062d1b858d84
 S
 #src/main/kotlin/com/example/Room.kt,2/5/25dee0daa1ec0ab660e44be8f2a33256e2c73a07
 `
@@ -23,7 +21,5 @@ Z
 -src/main/kotlin/com/example/ScheduleParser.kt,8/c/8cbb713d7cc485de5a3c81ceaceb3f9cc5e6cb3d
 T
 $src/main/kotlin/com/example/Place.kt,f/4/f4455f18ad2f036e78e8e031b679bbe4ed49716a
-[
-+src/main/kotlin/com/example/MainScenario.kt,c/d/cd7bfe62f22686aaae653b9d618a4f9a3b9cbe6e
 a
 1src/main/kotlin/com/example/LoggingInterceptor.kt,f/d/fd2035d83630b9ef87a3265d22c1daf3e728fa1e

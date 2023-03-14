@@ -1,6 +1,4 @@
 
-R
-"src/main/kotlin/com/example/Dev.kt,3/4/34edd4aa7cc08755ea50a01ed42f062d1b858d84
 [
 +src/main/kotlin/com/example/APIInterface.kt,9/4/9481e3a7574837fdaabcddcde3f863b873873374
 `
@@ -23,7 +21,5 @@ S
 +src/main/kotlin/com/example/ScheduleRoom.kt,a/4/a4f69be33e90f06984040fcb89ac9f789397ae3e
 7
 pom.xml,4/4/442292b8a7efeabbe4cc176709b833b1792140ec
-[
-+src/main/kotlin/com/example/MainScenario.kt,c/d/cd7bfe62f22686aaae653b9d618a4f9a3b9cbe6e
 a
 1src/main/kotlin/com/example/LoggingInterceptor.kt,f/d/fd2035d83630b9ef87a3265d22c1daf3e728fa1e
