@@ -1,7 +1,6 @@
 package com.example
 
 import com.justai.jaicf.BotEngine
-import com.justai.jaicf.activator.intent.IntentActivator
 import com.justai.jaicf.activator.regex.RegexActivator
 import com.justai.jaicf.channel.yandexalice.AliceChannel
 import com.justai.jaicf.channel.yandexalice.activator.AliceIntentActivator
