@@ -7,7 +7,11 @@ enum class Place(names: List<String>) {
 
     companion object {
         fun parseVal(placeName: String): Place {
-            return LOMONOSOVA
+            return when (placeName.toLowerCase()) {
+                "lomo" -> LOMONOSOVA
+                "kronva" -> KRONVERSKY
+                else -> NONE
+            }
         }
     }
 }
