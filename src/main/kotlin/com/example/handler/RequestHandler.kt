@@ -3,7 +3,9 @@ package com.example.handler
 import com.example.api_service.InfoHandler
 import com.example.models.*
 import java.sql.Date
+import java.text.DateFormatSymbols
 import java.time.Month
+
 
 class RequestHandler {
     fun handleRequest(place: String, time: String, month: String, day: String, type: String): RoomResponce {
@@ -83,5 +85,9 @@ class RequestHandler {
             return RoomResponce(listOf(Room(null, null, null, number)), ErrorTypeResponce.SUCCESS)
         }
         return RoomResponce(emptyList(), ErrorTypeResponce.NO_TYPE)
+    }
+
+    fun getMonth(month: Int): String? {
+        return DateFormatSymbols().months[month - 1]
     }
 }
