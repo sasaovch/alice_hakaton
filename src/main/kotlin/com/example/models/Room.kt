@@ -26,4 +26,12 @@ data class Room(
         this.roomId = roomId
         this.type = type
     }
+    constructor(
+        place: Place?,
+        time: Pair<Int, Int>?,
+        date: Date?,
+        type: RoomType
+    ) : this(place, time, date) {
+        this.type = type
+    }
 }

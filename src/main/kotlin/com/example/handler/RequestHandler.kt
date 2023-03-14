@@ -3,15 +3,16 @@ package com.example.handler
 import com.example.api_service.InfoHandler
 import com.example.models.*
 import java.sql.Date
+import java.time.Month
 
 class RequestHandler {
-    fun handleRequest(place: String, time: String, date: String, type: String): RoomResponce {
+    fun handleRequest(place: String, time: String, month: String, day: String, type: String): RoomResponce {
         val placeToBook: Place = Place.parseVal(place)
-        val dateToBook: Date? = parseDate(date)
+        val dateToBook: Date? = parseDate(month, day)
         val timeToBook: Pair<Int, Int>? = parseTime(time)
         val typeToBook: RoomType = RoomType.parseVal(type)
         if (placeToBook != Place.NONE && timeToBook != null && dateToBook != null && typeToBook != RoomType.NONE) {
-            val roomList = InfoHandler.getFreeRoomByDateAndTime(Room(placeToBook, timeToBook, dateToBook))
+            val roomList = InfoHandler.getFreeRoomByDateAndTime(Room(placeToBook, timeToBook, dateToBook, typeToBook))
             return RoomResponce(roomList, ErrorTypeResponce.SUCCESS)
         } else if (placeToBook == Place.NONE) {
             return RoomResponce(emptyList(), ErrorTypeResponce.NO_PLACE)
@@ -34,19 +35,13 @@ class RequestHandler {
         }
     }
 
-    private fun parseDate(strDate: String): Date? {
-        val dateArray = strDate.split(" ")
-        return if (dateArray[0].toIntOrNull() != null) {
-            val month = translateAndGetMonth(dateArray[1])
-            val date = dateArray[0].toInt()
-            Date(2023, month!!.value, date)
-        } else if (dateArray[1].toIntOrNull() != null) {
-            val month = translateAndGetMonth(dateArray[0])
-            val date = dateArray[1].toInt()
-            Date(2023, month!!.value, date)
-        } else {
-            return null
+    private fun parseDate(month: String, day: String): Date? {
+        val monthToBook: Month? = if (month != null) Month.valueOf(month.toUpperCase()) else null
+        val dayToBook: Int? = if (day != null && day.toIntOrNull() != null) day.toInt() else null
+        if (monthToBook != null && dayToBook != null) {
+            return Date(2023, monthToBook.value, dayToBook)
         }
+        return null
     }
 
     fun handleRequestPlace(place: String?): RoomResponce {
@@ -65,10 +60,12 @@ class RequestHandler {
         return RoomResponce(emptyList(), ErrorTypeResponce.NO_TIME)
     }
 
-    fun handleRequestDate(date: String?): RoomResponce {
-        val dateToBook: Date? = if (date != null) parseDate(date) else null
-        if (dateToBook != null) {
-            return RoomResponce(listOf(Room(null, null, dateToBook)), ErrorTypeResponce.SUCCESS)
+    fun handleRequestDate(month: String?, day: String?): RoomResponce {
+        val monthToBook: Month? = if (month != null) Month.valueOf(month.toUpperCase()) else null
+        val dayToBook: Int? = if (day != null && day.toIntOrNull() != null) day.toInt() else null
+
+        if (monthToBook != null && dayToBook != null) {
+            return RoomResponce(listOf(Room(null, null, Date(2023, monthToBook.value, dayToBook))), ErrorTypeResponce.SUCCESS)
         }
         return RoomResponce(emptyList(), ErrorTypeResponce.NO_TIME)
     }
