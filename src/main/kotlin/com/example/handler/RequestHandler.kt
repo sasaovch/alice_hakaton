@@ -71,7 +71,7 @@ class RequestHandler {
     }
 
     fun handleRequestType(type: String?): RoomResponce {
-        val typeToBook: RoomType = RoomType.valueOf(type.let { "none" })
+        val typeToBook: RoomType = RoomType.parseVal(type?: "none")
         if (typeToBook != RoomType.NONE) {
             return RoomResponce(listOf(Room(null, null, null, null, typeToBook)), ErrorTypeResponce.SUCCESS)
         }

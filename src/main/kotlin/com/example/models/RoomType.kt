@@ -5,8 +5,8 @@ enum class RoomType {
     companion object {
         fun parseVal(roomTypeName: String): RoomType {
             return when(roomTypeName.toLowerCase()) {
-                "аудитория" -> AUDIENCE
-                "переговорка" -> MEETINGROOM
+                "auditorium" -> AUDIENCE
+                "meeting_room" -> MEETINGROOM
                 else -> NONE
             }
         }
