@@ -1,4 +1,4 @@
-package com.example// import okhttp3.ResponseBody
+package com.example.models// import okhttp3.ResponseBody
 // import retrofit2.Call
 // import retrofit2.http.*
 
@@ -21,7 +21,7 @@ package com.example// import okhttp3.ResponseBody
 // import retrofit2.Call
 // import retrofit2.http.*
 
-// interface com.example.APIInterface {
+// interface com.example.api_service.APIInterface {
 
 //     @POST("/pls/apex/wwv_flow.show")
 //     @FormUrlEncoded

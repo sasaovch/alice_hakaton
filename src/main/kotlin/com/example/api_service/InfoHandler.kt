@@ -1,4 +1,6 @@
-package com.example
+package com.example.api_service
+import com.example.models.Room
+import com.example.models.ScheduledRoom
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -33,7 +35,8 @@ object InfoHandler {
         val request = retrofit.create(APIInterface::class.java)
 
         var parsed: ScheduledRoom = ScheduledRoom("", HashMap(), -1);
-        val response = request.getRoomInfo(ISU_APP_COOKIE,
+        val response = request.getRoomInfo(
+            ISU_APP_COOKIE,
             p_request,
             p_instance,
             p_flow_id,
@@ -57,7 +60,7 @@ object InfoHandler {
     }
 
     // fun getRoomInfo() {
-    //     val request = retrofit.create(com.example.APIInterface::class.java)
+    //     val request = retrofit.create(com.example.api_service.APIInterface::class.java)
 
     //     val call = request.getRoomInfo(
     //         ISU_APP_COOKIE,

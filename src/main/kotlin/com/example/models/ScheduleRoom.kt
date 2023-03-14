@@ -1,4 +1,4 @@
-package com.example
+package com.example.models
 
 data class ScheduledRoom(
     val date: String,

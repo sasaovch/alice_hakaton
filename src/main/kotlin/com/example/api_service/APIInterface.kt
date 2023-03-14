@@ -1,4 +1,4 @@
-package com.example
+package com.example.api_service
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*
@@ -54,6 +54,5 @@ interface APIInterface {
         @Field("p_arg_values") p_arg_value2: String,
         @Field("p_arg_names") p_arg_names3: String,
         @Field("p_arg_values") p_arg_value3: String,
-
     ): Call<ResponseBody>
 }

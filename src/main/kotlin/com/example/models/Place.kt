@@ -1,4 +1,4 @@
-package com.example
+package com.example.models
 
 enum class Place(names: List<String>) {
     LOMONOSOVA(listOf("Ломо", "Ломоносова 9")),
@@ -7,7 +7,7 @@ enum class Place(names: List<String>) {
 
     companion object {
         fun parseVal(placeName: String): Place {
-            return Place.LOMONOSOVA
+            return LOMONOSOVA
         }
     }
 }

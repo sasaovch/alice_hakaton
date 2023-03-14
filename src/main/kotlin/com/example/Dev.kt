@@ -1,5 +1,6 @@
 package com.example
 
+import com.example.alice_bot.channel
 import com.justai.jaicf.channel.http.httpBotRouting
 import io.ktor.routing.*
 import io.ktor.server.engine.*

@@ -1,4 +1,6 @@
-package com.exampledata class RoomInfoBody(
+package com.example.models
+
+class RoomInfoBody(
     val p_request: String,
     val p_flow_id: String,
     val p_flow_step_id: String,

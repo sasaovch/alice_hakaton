@@ -1,4 +1,5 @@
-package com.example
+package com.example.util
+import com.example.models.ScheduledRoom
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
