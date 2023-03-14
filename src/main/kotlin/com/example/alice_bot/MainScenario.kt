@@ -103,32 +103,36 @@ class MainScenario (
                         )
                     }
 
-
+                    reactions.go("/main_book")
                 }
             }
+
+            state("ask_date") {
+                activators {
+                    intent("ask_date")
+                }
+
+                action {
+                    val date = activator.alice?.slots?.get("date").toString()
+
+                    val responce = requestHandler.handleRequestDate(date)
+                    when (responce.error) {
+                        ErrorTypeResponce.NO_DATE -> reactions.say("ask_place")
+                        ErrorTypeResponce.SUCCESS -> reactions.say(
+                            "Юзер хочет забронировать на месте ${date?.toString() ?: "null"} "
+                        )
+                    }
+                }
+            }
+
+
         }
 
 
 
 
 
-        state("ask_date") {
-            activators {
-                intent("date")
-            }
 
-            action {
-                val date = activator.alice?.slots?.get("date").toString()
-
-                val responce = requestHandler.handleRequestDate(date)
-                when (responce.error) {
-                    ErrorTypeResponce.NO_DATE -> reactions.say("ask_place")
-                    ErrorTypeResponce.SUCCESS -> reactions.say(
-                        "Юзер хочет забронировать на месте ${date?.toString() ?: "null"} "
-                    )
-                }
-            }
-        }
 
         state("ask_time") {
             activators {
