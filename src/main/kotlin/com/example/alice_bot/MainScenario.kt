@@ -24,7 +24,6 @@ class MainScenario (
     private val requestHandler: RequestHandler
 ) : Scenario() {
     init {
-
         /**
          * Стартовое сообщение, когда пользователь запускает ваш навык
          */
@@ -124,7 +123,6 @@ class MainScenario (
                             "Юзер хочет забронировать на месте ${date?.toString() ?: "null"} "
                         )
                     }
-
                     reactions.go("/main_book")
                 }
             }
@@ -172,16 +170,6 @@ class MainScenario (
             }
 
         }
-
-
-
-
-
-
-
-
-
-
 
         fallback {
             reactions.say("Не распарсилось")

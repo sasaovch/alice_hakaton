@@ -5,6 +5,12 @@ import com.example.models.*
 import java.sql.Date
 
 class RequestHandler {
+    val infoHandler : InfoHandler = InfoHandler;
+    fun makeRequest() {
+        infoHandler.checkInstance()
+        val ans = infoHandler.getFreeRooms(Place.KRONVERSKY, "15:30-16:00", "25.03.2023", RoomType.MEETINGROOM)
+        println(ans)
+    }
     fun handleRequest(place: String?, time: String?, date: String?, type: String?): RoomResponce {
         val placeToBook: Place = if (place==null) Place.NONE else Place.parseVal(place)
         val timeToBook: Date = Date.valueOf(time)

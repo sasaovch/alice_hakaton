@@ -15,9 +15,9 @@ class LoggingInterceptor : Interceptor {
 
         println(
             "Sending request to ${request.url()} with body: ${requestBodyString}")
-            // Proceed with the request
-            val response = chain.proceed (request)
-            return response
+        // Proceed with the request
+        val response = chain.proceed (request)
+        return response
     }
 
     private fun bodyToString(request: RequestBody): String {
