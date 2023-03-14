@@ -1,37 +1,12 @@
 package com.example.models
 
+import java.time.Month
 import java.util.Date
 data class Room(
-    val place: Place?,
-    val time: Pair<Int, Int>?,
-    val date: Date?,
-) {
-    var roomId: Int? = 0
+    val place: Place? = null,
+    val time: Pair<Int, Int>? = null,
+    val day: Int? = null,
+    val month: Month? = null,
+    var roomId: Int? = 0,
     var type: RoomType = RoomType.NONE
-    constructor(
-        place: Place?,
-        time: Pair<Int, Int>?,
-        date: Date?,
-        roomId: Int?,
-    ) : this(place, time, date) {
-        this.roomId = roomId
-    }
-    constructor(
-        place: Place?,
-        time: Pair<Int, Int>?,
-        date: Date?,
-        roomId: Int?,
-        type: RoomType
-    ) : this(place, time, date) {
-        this.roomId = roomId
-        this.type = type
-    }
-    constructor(
-        place: Place?,
-        time: Pair<Int, Int>?,
-        date: Date?,
-        type: RoomType
-    ) : this(place, time, date) {
-        this.type = type
-    }
-}
+)

@@ -80,7 +80,7 @@ class MainScenario (
                         ErrorTypeResponce.NO_DATE -> reactions.say("Неправильная дата")
                         ErrorTypeResponce.SUCCESS -> {
                             saveToSession(
-                                mapOf("month" to response.roomList[0].date!!.month, "day" to response.roomList.get(0).date!!.date.toString()),
+                                mapOf("month" to response.roomList[0].month.toString(), "day" to response.roomList[0].day.toString()),
                                 reactions,
                                 request
                             )
@@ -208,8 +208,8 @@ class MainScenario (
             if (month != null && day != null) {
                 dateReq = requestHandler.handleRequestDate(month.toString().substring(1, month.toString().length - 1), day.toString()?: "")
                 if (dateReq.error != ErrorTypeResponce.NO_DATE) {
-                    mapToSaveSession["day"] = dateReq.roomList[0].date!!.date.toString()
-                    mapToSaveSession["month"] = dateReq.roomList[0].date!!.month.toString()
+                    mapToSaveSession["day"] = dateReq.roomList[0].day.toString()
+                    mapToSaveSession["month"] = dateReq.roomList[0].month.toString()
                 }
             }
             val timeReq = requestHandler.handleRequestTime(time?.toString()?.substring(1, time.toString().length - 1)?: "")
