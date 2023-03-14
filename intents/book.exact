@@ -1,0 +1,23 @@
+slots:
+    bookdate:
+        source: $BookDate
+        type: YANDEX.YANDEX.DATETIME
+    what:
+        source: $Type
+    where:
+        type: ItmoPlace
+        source: $Where
+
+root:
+    %lemma
+    $BookWord [($Type)? ((на | в)? ($Where))? ((на | в)? $BookDate?)]
+$BookWord:
+    %lemma
+    забронируй | забронь | бронь
+$BookDate:
+    $YANDEX.DATETIME
+$Where:
+    $ItmoPlace
+$Type:
+    %lemma
+    аудитория | переговорка
