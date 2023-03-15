@@ -1,0 +1,19 @@
+slots:
+    day:
+        type: YANDEX.NUMBER
+        source: $DayNumber
+    month:
+        type: BookTimeMonth
+        source: $Month
+
+
+root:
+    %lemma
+    (на | в)? [$DayNumber $Month]
+
+$DayNumber:
+    %lemma
+    $YANDEX.NUMBER
+
+$Month:
+    $BookTimeMonth

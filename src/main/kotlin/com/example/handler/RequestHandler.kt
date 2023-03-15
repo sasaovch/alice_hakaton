@@ -2,12 +2,20 @@ package com.example.handler
 
 import com.example.api_service.InfoHandler
 import com.example.models.*
-import java.sql.Date
 import java.text.DateFormatSymbols
 import java.time.Month
+import java.util.Date
+import java.util.*
 
 
 class RequestHandler {
+    val infoHandler : InfoHandler = InfoHandler;
+    fun makeRequest(place: Place, time: String, date: String, type: RoomType) {
+        infoHandler.checkInstance()
+        val ans = infoHandler.getFreeRooms(place, time, date, type)
+        println(ans)
+        infoHandler.register()
+    }
     fun handleRequest(place: String, time: String, month: String, day: String, type: String): RoomResponce {
         val placeToBook: Place = Place.parseVal(place)
         val dateToBook: Date? = parseDate(month, day)
@@ -33,6 +41,12 @@ class RequestHandler {
             return RoomResponce(emptyList(), ErrorTypeResponce.NO_TYPE)
         }
         return RoomResponce(emptyList(), ErrorTypeResponce.NO_PLACE)
+//        val timeString = time.first.toString() + ":" + time.second.toString() + "0-" + time.first.toString() + ":" + (time.second + 30).toString()
+//        println(timeString)
+//        val dateString = date.date.toString() + ".0" + date.month.toString() + "." + "2023"
+ //       println(dateString)
+ //       makeRequest(place, timeString, dateString, type)
+  //      return RoomResponce(emptyList(), ErrorTypeResponce.SUCCESS)
     }
 
     private fun parseTime(strTime: String): Pair<Int, Int>? {

@@ -1,0 +1,60 @@
+entity ItmoPlace:
+    lemma: true
+    values:
+        kronva:
+            гк
+            главный корпус
+            кронва
+            кронверкский (49)?
+        lomo:
+            ломо
+            ломоносова (9)?
+
+entity PlaceType:
+    lemma: true
+    values:
+        auditorium:
+            аудитория
+        meeting_room:
+            переговорка
+
+
+entity BookTime:
+    lemma: true
+    values:
+        exact:
+            $YANDEX.NUMBER $YANDEX.NUMBER
+
+entity BookDate:
+    lemma: true
+    values:
+        exact:
+            $YANDEX.NUMBER (январь | февраль | март | апрель | май | июнь | июль | август | сентябрь | октябрь | ноябрь | декабрь)
+
+entity BookTimeMonth:
+    lemma: true
+    values:
+        january:
+            январь
+        february:
+            февраль
+        march:
+            март
+        april:
+            апрель
+        may:
+            май
+        june:
+            июнь
+        july:
+            июль
+        august:
+            август
+        september:
+            сентябрь
+        october:
+            октябрь
+        november:
+            ноябрь
+        december:
+            декабрь

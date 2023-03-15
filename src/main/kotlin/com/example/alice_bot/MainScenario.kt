@@ -26,7 +26,8 @@ class MainScenario (
             }
 
             action {
-                reactions.sayRandom("Привет! Хотите забронировать аудиторию?",
+                reactions.sayRandom(
+                    "Привет! Хотите забронировать аудиторию?",
                     "Я могу подать заявку на бронь аудитории, также рассказать о доступных вариантах для бронирования.",
                     "Я могу помочь вам в бронировании аудитории, и сказать список доступных на определенный момент времени",
                     "Я могу помочь вам с подбором аудитории"
@@ -129,9 +130,9 @@ class MainScenario (
                     when (response.error) {
                         ErrorTypeResponce.NO_TYPE -> reactions.say("ask_place")
                         ErrorTypeResponce.SUCCESS -> {
-                            saveToSession("type", type.toString(), reactions, request)
+                            saveToSession("type", response.roomList.get(0).type.toString(), reactions, request)
                             reactions.say(
-                                "Поняла вас ${type?.toString() ?: "null"} "
+                                "Поняла вас ${response.roomList.get(0).type} "
                             )
                         }
                     }
@@ -220,6 +221,7 @@ class MainScenario (
             if (typeReq.error != ErrorTypeResponce.NO_TYPE) {
 //            saveToSession("room", typeReq.roomList.get(0).type.toString(), reactions, request)
                 mapToSaveSession["room"] = typeReq.roomList[0].type.toString()
+//                            mapToSaveSession.put("room", typeReq.roomList.get(0).type.toString())
             }
             saveToSession(mapToSaveSession, reactions, request)
             if (placeReq.error == ErrorTypeResponce.NO_PLACE) {
@@ -242,19 +244,17 @@ class MainScenario (
                 println("все ок")
                 reactions.say("Окей, бронирую")
                 val response =
-                    requestHandler.handleRequest(place.toString(), time.toString(), month.toString(), day.toString(), type.toString())
-//                requestHandler.handleRequest(place.toString(), time.toString(), month.toString(), day.toString(), "переговорка")
-                when (response.error) {
-                    ErrorTypeResponce.NO_PLACE -> reactions.go("/main_book/say_place")
-                    ErrorTypeResponce.NO_DATE -> reactions.go("/main_book/say_date")
-                    ErrorTypeResponce.NO_TIME -> reactions.go("/main_book/say_time")
-                    ErrorTypeResponce.NO_TYPE -> reactions.go("/main_book/say_type")
-                    ErrorTypeResponce.SUCCESS -> reactions.say(
-                        "Юзер хочет забронировать на месте ${place?.toString() ?: "null"} " +
-                                "во время ${time?.toString() ?: "null"} " +
-                                "вот это: ${type?.toString() ?: "null"}"
-                    )
-                }
+                requestHandler.handleRequest(placeReq.roomList.get(0).place!!, dateReq.roomList.get(0).date!!, timeReq.roomList.get(0).time!!, typeReq.roomList.get(0).type)
+            when (response.error) {
+                ErrorTypeResponce.NO_PLACE -> reactions.go("/main_book/say_place")
+                ErrorTypeResponce.NO_DATE -> reactions.go("/main_book/say_date")
+                ErrorTypeResponce.NO_TIME -> reactions.go("/main_book/say_time")
+                ErrorTypeResponce.NO_TYPE -> reactions.go("/main_book/say_type")
+                ErrorTypeResponce.SUCCESS -> reactions.say(
+                    "Юзер хочет забронировать на месте ${place?.toString() ?: "null"} " +
+                            "во время ${time?.toString() ?: "null"} " +
+                            "вот это: ${type?.toString() ?: "null"}"
+                )
             }
             reactions.say(
                 "Юзер хочет забронировать на месте ${place?.toString() ?: "null"} " +

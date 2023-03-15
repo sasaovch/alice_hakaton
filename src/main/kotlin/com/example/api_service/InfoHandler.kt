@@ -1,6 +1,9 @@
 package com.example.api_service
+import com.example.models.Place
 import com.example.models.Room
+import com.example.models.RoomType
 import com.example.models.ScheduledRoom
+import com.example.models.ScheduleParser
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -12,24 +15,33 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.regex.Pattern
 
 object InfoHandler {
-    val ISU_APP_COOKIE: String = "ISU_AP_COOKIE=ORA_WWV-9wgltnwtLiGaJR5elh7MTxvG"
-    val ISU_LIB_SID: String = "ISU_LIB_SID=ORA_WWV-9wgltnwtLiGaJR5elh7MTxvG"
-    val ORA_WWV_RAC_INSTANCE: String = "ORA_WWV_RAC_INSTANCE=2"
-    val REMEMBER_SSO: String =
-        "REMEMBER_SSO=FC84F51D11B63EA68D58127C20BBD205:D8C00EED818CD17B9CFF727951816DD5950A7AE94044D326056EEB3D5F4A4A3C451F02C5C70D9CFEAAA40DB2CF0736D0"
-    val p_request: String = "PLUGIN=EAE6166322D1B57EE5653B4A4C8BA147FC2BCA7C3102BF5F9180B8EF40B2DC1F"
-    val p_instance: String = "102873203866118"
+    val ISU_APP_COOKIE: String = "ISU_AP_COOKIE=ORA_WWV-S391c59P+l0xY1wDzm46whDy"
+    var p_request: String = "PLUGIN="
+    var p_instance: String = ""
     val p_flow_id: String = "2431"
     val p_flow_step_id: String = "4"
+    val parser: ScheduleParser = ScheduleParser()
+    fun setRequest(s: String) {
+        p_request = "PLUGIN=${s}"
+    }
 
-    private val client = OkHttpClient.Builder().addInterceptor(LoggingInterceptor()).followRedirects(false)
-        .followSslRedirects(false).build()
+    //TODO: remove followRedirect
+    private var client = OkHttpClient.Builder().addInterceptor(LoggingInterceptor()).followRedirects(true)
+        .followSslRedirects(true).build()
     private val retrofit = Retrofit.Builder()
-        .baseUrl("https://id.itmo.ru/")
+        .baseUrl("https://isu.ifmo.ru/")
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
         .addConverterFactory(ScalarsConverterFactory.create())
         .build()
+
+    private val KronvCovorkingAud =
+        hashMapOf<Int, Int>(Pair(1301, 18863), Pair(1311, 18865), Pair(1314, 18867), Pair(1312, 18871))
+    private val KronvAuditorium = hashMapOf<Int, Int>(Pair(2337, 29), Pair(2336, 30), Pair(2326, 36), Pair(2316, 41),
+        Pair(1410, 73), Pair(1419, 77), Pair(2407, 82), Pair(2412, 84),
+        Pair(2414, 85), Pair(2416, 86), Pair(2426, 91), Pair(2433, 93),
+        Pair(1229, 95), Pair(2304, 145), Pair(1316, 200), Pair(2201, 215),
+        Pair(1404, 516), Pair(1405, 20005))
 
     fun getRoomInfo(roomId: Int, date: String): ScheduledRoom {
         val request = retrofit.create(APIInterface::class.java)
@@ -42,58 +54,87 @@ object InfoHandler {
             p_flow_id,
             p_flow_step_id,
             "P4_AUD_SEL",
-            "-17",
+            "-603",
             "P4_ROOMS_ID2",
             roomId.toString(),
             "P4_DATE",
             date
         )
         //no errors handling!
-//        parsed = parser.parseSchedule(response.execute().body()?.string(), roomId, date)
+        parsed = parser.parseSchedule(response.execute().body()?.string(), roomId, date)
 
 
         return parsed
+
+    }
+    //time in format 8:30
+    fun getFreeRooms(place: Place, time: String, date: String, type: RoomType) : ArrayList<Int>{
+        val freeList  = ArrayList<Int>()
+        if (place == Place.KRONVERSKY) {
+            if (type == RoomType.AUDIENCE) {
+
+                return getFreeList(KronvAuditorium, time, date) //todo map aud
+            }
+            if(type == RoomType.MEETINGROOM) {
+                return getFreeList(KronvCovorkingAud, time, date)
+
+            }
+        }
+        return ArrayList()
+
     }
 
-    fun getFreeRoomByDateAndTime(room: Room): List<Room> {
-        return emptyList();
+    private fun getFreeList(aud: HashMap<Int, Int>, time: String, date: String): ArrayList<Int> {
+        val freeList = ArrayList<Int>()
+        for (pair in aud.entries.iterator()) {
+            val parsed = getRoomInfo(pair.value, date)
+            println(parsed)
+            println(parsed.schedule[time])
+            println(parsed.schedule)
+            if (parsed.schedule[time] == true) {
+                freeList.add(pair.key)
+            }
+        }
+        return freeList
     }
 
-    // fun getRoomInfo() {
-    //     val request = retrofit.create(com.example.api_service.APIInterface::class.java)
+    fun checkInstance() {
+        val cl = OkHttpClient.Builder().addInterceptor(LoggingInterceptor()).followRedirects(false)
+            .followSslRedirects(false).build()
+        val rf = Retrofit.Builder()
+            .baseUrl("https://isu.ifmo.ru/")
+            .client(cl)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .build()
+        val request = rf.create(APIInterface::class.java)
+        val call = request.checkForRedirect(
+            ISU_APP_COOKIE,
+        )
+        val response = call.execute()
+        if (response.code() == 302) {
+            println(response.headers().get("Location"))
+        }
+        p_instance = response.headers().get("Location")!!.split(":")[2] //todo NULL HANDLING
+        println(p_instance)
+        parsePlugin()
+    }
 
-    //     val call = request.getRoomInfo(
-    //         ISU_APP_COOKIE,
-    //         p_request,
-    //         p_instance,
-    //         p_flow_id,
-    //         p_flow_step_id,
-    //         "P4_AUD_SEL",
-    //         "-17",
-    //         "P4_ROOMS_ID2",
-    //         "29,30,36,41,73,77,82,84,85,86,91,93,95,145,200,215,516,20005,20007",
-    //         "P4_DATE",
-    //         "25.03.2023"
+    fun parsePlugin() {
+        val request = retrofit.create(APIInterface::class.java)
+        val call = request.getHtmlWithPlugin(ISU_APP_COOKIE)
+        //todo NULL CHECKING
+        val pluginString = call.execute().body()?.string()?.split('\n')?.get(1923)
+        val s1 = pluginString?.substring(pluginString.indexOf("ajaxIdentifier"))
+        val s2 = s1?.split(':')?.get(1)
+        val s3 = s2?.split(',')?.get(0)
+        val s4 = s3?.substring(1, s3.length - 1)
+        if (s4 != null) {
+            setRequest(s4)
+        }
+        println(s4)
 
-    //     )
-    //     call.enqueue(object : Callback<ResponseBody> {
-    //         override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-    //             if (response.isSuccessful) {
-    //                 println(response.body()?.string())
-    //                 // Handle successful response
-    //             } else {
-    //                 val errorMessage = response.message() // Get error message
-    //                 print(errorMessage)
-    //             }
-    //         }
-
-    //         override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-    //             val errorMessage = t.message // Get error message
-    //             print(errorMessage)
-    //         }
-    //     })
-
-    // }
+    }
 
     fun register() {
         val request = retrofit.create(APIInterface::class.java)
