@@ -15,7 +15,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.regex.Pattern
 
 object InfoHandler {
-    val ISU_APP_COOKIE: String = "ISU_AP_COOKIE=ORA_WWV-S391c59P+l0xY1wDzm46whDy"
+    val ISU_APP_COOKIE: String = "ISU_AP_COOKIE=ORA_WWV-TpaRYgNQd7v6wxIMGYb7+JZN"
     var p_request: String = "PLUGIN="
     var p_instance: String = ""
     val p_flow_id: String = "2431"
@@ -37,11 +37,11 @@ object InfoHandler {
 
     private val KronvCovorkingAud =
         hashMapOf<Int, Int>(Pair(1301, 18863), Pair(1311, 18865), Pair(1314, 18867), Pair(1312, 18871))
-    private val KronvAuditorium = hashMapOf<Int, Int>(Pair(2337, 29), Pair(2336, 30), Pair(2326, 36), Pair(2316, 41),
-        Pair(1410, 73), Pair(1419, 77), Pair(2407, 82), Pair(2412, 84),
-        Pair(2414, 85), Pair(2416, 86), Pair(2426, 91), Pair(2433, 93),
-        Pair(1229, 95), Pair(2304, 145), Pair(1316, 200), Pair(2201, 215),
-        Pair(1404, 516), Pair(1405, 20005))
+    private val KronvAuditorium = hashMapOf<Int, Int>(Pair(2337, 29), Pair(2336, 30), Pair(2326, 36), Pair(2316, 41))
+//        Pair(1410, 73), Pair(1419, 77), Pair(2407, 82), Pair(2412, 84),
+//        Pair(2414, 85), Pair(2416, 86), Pair(2426, 91), Pair(2433, 93),
+//        Pair(1229, 95), Pair(2304, 145), Pair(1316, 200), Pair(2201, 215),
+//        Pair(1404, 516), Pair(1405, 20005))
 
     fun getRoomInfo(roomId: Int, date: String): ScheduledRoom {
         val request = retrofit.create(APIInterface::class.java)

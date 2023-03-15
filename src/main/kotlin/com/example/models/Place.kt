@@ -10,6 +10,8 @@ enum class Place(names: List<String>) {
             return when (placeName.toLowerCase()) {
                 "lomo" -> LOMONOSOVA
                 "kronva" -> KRONVERSKY
+                "kronversky" -> KRONVERSKY
+                "lomonosova" -> LOMONOSOVA
                 else -> NONE
             }
         }

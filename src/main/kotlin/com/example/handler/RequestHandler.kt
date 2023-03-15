@@ -10,19 +10,18 @@ import java.util.Date
 
 class RequestHandler {
     private val infoHandler : InfoHandler = InfoHandler;
-    fun makeRequest(place: Place, time: String, date: String, type: RoomType) {
+    fun makeRequest(place: Place, time: String, date: String, type: RoomType): List<Int> {
         infoHandler.checkInstance()
-        val ans = infoHandler.getFreeRooms(place, time, date, type)
-        println(ans)
-        infoHandler.register()
+        return infoHandler.getFreeRooms(place, time, date, type)
+//        println(ans)
+//        infoHandler.register()
     }
-    fun handleRequest(place: Place, month: Month, day: Int, time: Pair<Int, Int>, type: RoomType): RoomResponce {
+    fun handleRequest(place: Place, month: Month, day: Int, time: Pair<Int, Int>, type: RoomType): List<Int> {
         val timeString = time.first.toString() + ":" + time.second.toString() + "0-" + time.first.toString() + ":" + (time.second + 30).toString()
         println(timeString)
-        val dateString = day.toString() + ".0" + month.toString().toLowerCase() + "." + "2023"
+        val dateString = day.toString() + ".0" + month.value + "." + "2023"
         println(dateString)
-        makeRequest(place, timeString, dateString, type)
-        return RoomResponce(emptyList(), ErrorTypeResponce.SUCCESS)
+        return makeRequest(place, timeString, dateString, type)
     }
     fun handleRequest(place: String, time: String, month: String, day: String, type: String): RoomResponce {
         val placeToBook: Place = Place.parseVal(place)
@@ -96,6 +95,7 @@ class RequestHandler {
     }
 
     fun handleRequestType(type: String?): RoomResponce {
+        println(type + " in handle")
         val typeToBook: RoomType = RoomType.parseVal(type ?: "none")
         if (typeToBook != RoomType.NONE) {
             return RoomResponce(listOf(Room(type = typeToBook)), ErrorTypeResponce.SUCCESS)

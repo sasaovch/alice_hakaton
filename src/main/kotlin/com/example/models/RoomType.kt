@@ -7,6 +7,8 @@ enum class RoomType {
             return when(roomTypeName.toLowerCase()) {
                 "auditorium" -> AUDIENCE
                 "meeting_room" -> MEETINGROOM
+                "audience" -> AUDIENCE
+                "meetingroom" -> MEETINGROOM
                 else -> NONE
             }
         }
