@@ -5,16 +5,24 @@ import com.example.models.*
 import java.text.DateFormatSymbols
 import java.time.Month
 import java.util.Date
-import java.util.*
+
 
 
 class RequestHandler {
-    val infoHandler : InfoHandler = InfoHandler;
+    private val infoHandler : InfoHandler = InfoHandler;
     fun makeRequest(place: Place, time: String, date: String, type: RoomType) {
         infoHandler.checkInstance()
         val ans = infoHandler.getFreeRooms(place, time, date, type)
         println(ans)
         infoHandler.register()
+    }
+    fun handleRequest(place: Place, month: Month, day: Int, time: Pair<Int, Int>, type: RoomType): RoomResponce {
+        val timeString = time.first.toString() + ":" + time.second.toString() + "0-" + time.first.toString() + ":" + (time.second + 30).toString()
+        println(timeString)
+        val dateString = day.toString() + ".0" + month.toString().toLowerCase() + "." + "2023"
+        println(dateString)
+        makeRequest(place, timeString, dateString, type)
+        return RoomResponce(emptyList(), ErrorTypeResponce.SUCCESS)
     }
     fun handleRequest(place: String, time: String, month: String, day: String, type: String): RoomResponce {
         val placeToBook: Place = Place.parseVal(place)
@@ -41,12 +49,6 @@ class RequestHandler {
             return RoomResponce(emptyList(), ErrorTypeResponce.NO_TYPE)
         }
         return RoomResponce(emptyList(), ErrorTypeResponce.NO_PLACE)
-//        val timeString = time.first.toString() + ":" + time.second.toString() + "0-" + time.first.toString() + ":" + (time.second + 30).toString()
-//        println(timeString)
-//        val dateString = date.date.toString() + ".0" + date.month.toString() + "." + "2023"
- //       println(dateString)
- //       makeRequest(place, timeString, dateString, type)
-  //      return RoomResponce(emptyList(), ErrorTypeResponce.SUCCESS)
     }
 
     private fun parseTime(strTime: String): Pair<Int, Int>? {
@@ -88,7 +90,7 @@ class RequestHandler {
         val dayToBook: Int? = if (day != null && day.toIntOrNull() != null) day.toInt() else null
 
         if (monthToBook != null && dayToBook != null) {
-            return RoomResponce(listOf(Room(null, null, dayToBook, monthToBook)), ErrorTypeResponce.SUCCESS)
+            return RoomResponce(listOf(Room(day = dayToBook, month = monthToBook)), ErrorTypeResponce.SUCCESS)
         }
         return RoomResponce(emptyList(), ErrorTypeResponce.NO_TIME)
     }

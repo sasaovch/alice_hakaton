@@ -211,4 +211,7 @@ object InfoHandler {
             }
         })
     }
+    fun getFreeRoomByDateAndTime(room: Room): List<Room> {
+        return emptyList()
+    }
 }

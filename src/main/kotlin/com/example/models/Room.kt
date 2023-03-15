@@ -1,7 +1,6 @@
 package com.example.models
 
 import java.time.Month
-import java.util.Date
 data class Room(
     val place: Place? = null,
     val time: Pair<Int, Int>? = null,

@@ -128,7 +128,7 @@ class MainScenario (
                     println(activator.alice?.slots)
                     val response = requestHandler.handleRequestType(type.substring(1, type.toString().length - 1))
                     when (response.error) {
-                        ErrorTypeResponce.NO_TYPE -> reactions.say("ask_place")
+                        ErrorTypeResponce.NO_TYPE -> reactions.say("Неверный тип: аудитория или переговорка")
                         ErrorTypeResponce.SUCCESS -> {
                             saveToSession("type", response.roomList.get(0).type.toString(), reactions, request)
                             reactions.say(
@@ -190,7 +190,6 @@ class MainScenario (
     }
 
     private fun switcher(activator: ActivatorContext, reactions: Reactions, request: BotRequest) {
-        try {
             val slots = activator.alice?.slots
             val state = request.alice?.state?.session
 
@@ -200,11 +199,12 @@ class MainScenario (
             val day = slots?.get("day")?.value?: state?.get("day")
             val time = slots?.get("time")?.value?: state?.get("time")
             val type = slots?.get("room")?.value?: state?.get("room")
-            val placeReq = requestHandler.handleRequestPlace(place?.toString()?.substring(1, place.toString().length - 1))
 
+            val placeReq = requestHandler.handleRequestPlace(place?.toString()?.substring(1, place.toString().length - 1))
             if (placeReq.error != ErrorTypeResponce.NO_PLACE) {
                 mapToSaveSession["place"] = placeReq.roomList[0].place.toString()
             }
+
             var dateReq: RoomResponce? = null
             if (month != null && day != null) {
                 dateReq = requestHandler.handleRequestDate(month.toString().substring(1, month.toString().length - 1), day.toString()?: "")
@@ -213,17 +213,19 @@ class MainScenario (
                     mapToSaveSession["month"] = dateReq.roomList[0].month.toString()
                 }
             }
+
             val timeReq = requestHandler.handleRequestTime(time?.toString()?.substring(1, time.toString().length - 1)?: "")
             if (timeReq.error != ErrorTypeResponce.NO_TIME) {
                 mapToSaveSession["time"] = timeReq.roomList[0].time!!.first.toString() + " " + timeReq.roomList[0].time!!.second.toString()
             }
+
             val typeReq = requestHandler.handleRequestType(type?.toString()?.substring(1, type.toString().length - 1) ?: "")
             if (typeReq.error != ErrorTypeResponce.NO_TYPE) {
-//            saveToSession("room", typeReq.roomList.get(0).type.toString(), reactions, request)
                 mapToSaveSession["room"] = typeReq.roomList[0].type.toString()
-//                            mapToSaveSession.put("room", typeReq.roomList.get(0).type.toString())
             }
+
             saveToSession(mapToSaveSession, reactions, request)
+
             if (placeReq.error == ErrorTypeResponce.NO_PLACE) {
                 println("корпуса нет")
                 reactions.say("Не уточнен корпус")
@@ -242,29 +244,32 @@ class MainScenario (
                 reactions.go("say_type")
             } else {
                 println("все ок")
-                reactions.say("Окей, бронирую")
+                val (s, s1) = reactions.say("Окей, бронирую")
                 val response =
-                requestHandler.handleRequest(placeReq.roomList.get(0).place!!, dateReq.roomList.get(0).date!!, timeReq.roomList.get(0).time!!, typeReq.roomList.get(0).type)
-            when (response.error) {
-                ErrorTypeResponce.NO_PLACE -> reactions.go("/main_book/say_place")
-                ErrorTypeResponce.NO_DATE -> reactions.go("/main_book/say_date")
-                ErrorTypeResponce.NO_TIME -> reactions.go("/main_book/say_time")
-                ErrorTypeResponce.NO_TYPE -> reactions.go("/main_book/say_type")
-                ErrorTypeResponce.SUCCESS -> reactions.say(
+                    requestHandler.handleRequest(
+                        placeReq.roomList[0].place!!,
+                        dateReq.roomList[0].month!!,
+                        dateReq.roomList[0].day!!,
+                        timeReq.roomList[0].time!!,
+                        typeReq.roomList[0].type,
+                    )
+                when (response.error) {
+                    ErrorTypeResponce.NO_PLACE -> reactions.go("/main_book/say_place")
+                    ErrorTypeResponce.NO_DATE -> reactions.go("/main_book/say_date")
+                    ErrorTypeResponce.NO_TIME -> reactions.go("/main_book/say_time")
+                    ErrorTypeResponce.NO_TYPE -> reactions.go("/main_book/say_type")
+                    ErrorTypeResponce.SUCCESS -> reactions.say(
+                        "Юзер хочет забронировать на месте ${place?.toString() ?: "null"} " +
+                                "во время ${time?.toString() ?: "null"} " +
+                                "вот это: ${type?.toString() ?: "null"}"
+                    )
+                }
+                reactions.say(
                     "Юзер хочет забронировать на месте ${place?.toString() ?: "null"} " +
                             "во время ${time?.toString() ?: "null"} " +
                             "вот это: ${type?.toString() ?: "null"}"
                 )
             }
-            reactions.say(
-                "Юзер хочет забронировать на месте ${place?.toString() ?: "null"} " +
-                        "во время ${time?.toString() ?: "null"} " +
-                        "вот это: ${type?.toString() ?: "null"}"
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
     }
 
     private fun saveToSession(map: Map<String, Any>, reactions: Reactions, request: BotRequest) {
