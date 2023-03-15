@@ -3,6 +3,7 @@ package com.example.alice_bot
 import com.example.handler.RequestHandler
 import com.example.models.ErrorTypeResponce
 import com.example.models.RoomResponce
+import com.example.util.removeQuotations
 import com.justai.jaicf.api.BotRequest
 import com.justai.jaicf.channel.yandexalice.activator.alice
 import com.justai.jaicf.channel.yandexalice.alice
@@ -57,7 +58,7 @@ class MainScenario (
                     println("ask_place")
                     val place = activator.alice?.slots?.get("place")?.value
 
-                    val response = requestHandler.handleRequestPlace(place.toString().substring(1, place.toString().length - 1))
+                    val response = requestHandler.getPlaceFromRequest(removeQuotations(place!!))
                     when (response.error) {
                         ErrorTypeResponce.NO_PLACE -> {
                             reactions.say("Не верный адрес. Доступно только Ломоносова 9 и Кронва 49")
@@ -82,7 +83,7 @@ class MainScenario (
                     val month = activator.alice?.slots?.get("month")?.value
                     val day = activator.alice?.slots?.get("day")?.value
 
-                    val response = requestHandler.handleRequestDate(month.toString().substring(1, month.toString().length - 1), day.toString())
+                    val response = requestHandler.getMonthAndDayFromRequest(removeQuotations(month!!), day.toString())
                     when (response.error) {
                         ErrorTypeResponce.NO_DATE -> reactions.say("Неправильная дата")
                         ErrorTypeResponce.SUCCESS -> {
@@ -107,7 +108,7 @@ class MainScenario (
                     println("ask_time")
                     val time = activator.alice?.slots?.get("time")?.value.toString()
 
-                    val response = requestHandler.handleRequestTime(time.toString().substring(1, time.toString().length - 1))
+                    val response = requestHandler.getTimeFromRequest(removeQuotations(time))
                     when (response.error) {
                         ErrorTypeResponce.NO_TIME -> reactions.say("Неверное время")
                         ErrorTypeResponce.SUCCESS -> {
@@ -128,12 +129,11 @@ class MainScenario (
                 action {
                     println("ask_type")
                     val type = activator.alice?.slots?.get("room")?.value
-                    println(type.toString() +" "+"sadsadsadasd")
-                    val response = requestHandler.handleRequestType(type.toString().substring(1, type.toString().length - 1))
+                    val response = requestHandler.getTypeFromRequest(removeQuotations(type!!))
                     when (response.error) {
                         ErrorTypeResponce.NO_TYPE -> reactions.say("Неверный тип: аудитория или переговорка")
                         ErrorTypeResponce.SUCCESS -> {
-                            saveToSession("type", response.roomList.get(0).type.toString(), reactions, request)
+                            saveToSession("type", response.roomList[0].type.toString(), reactions, request)
                         }
                     }
                     println("back to main_book")
@@ -207,27 +207,27 @@ class MainScenario (
         println(day)
         println(time)
         println(type)
-
-            val placeReq = requestHandler.handleRequestPlace(place?.toString()?.substring(1, place.toString().length - 1))
+//TODO: вынести код с 211 по 234 в отдельный метод
+            val placeReq = requestHandler.getPlaceFromRequest(removeQuotations(place?: ""))
             if (placeReq.error != ErrorTypeResponce.NO_PLACE) {
                 mapToSaveSession["place"] = placeReq.roomList[0].place.toString()
             }
 
             var dateReq: RoomResponce? = null
             if (month != null && day != null) {
-                dateReq = requestHandler.handleRequestDate(month.toString().substring(1, month.toString().length - 1), day.toString().replace("\"", ""))
+                dateReq = requestHandler.getMonthAndDayFromRequest(removeQuotations(month), removeQuotations(day))
                 if (dateReq.error != ErrorTypeResponce.NO_TIME) {
                     mapToSaveSession["day"] = dateReq.roomList[0].day.toString()
                     mapToSaveSession["month"] = dateReq.roomList[0].month.toString()
                 }
             }
 
-            val timeReq = requestHandler.handleRequestTime(time?.toString()?.substring(1, time.toString().length - 1)?: "")
+            val timeReq = requestHandler.getTimeFromRequest(removeQuotations(time?: ""))
             if (timeReq.error != ErrorTypeResponce.NO_TIME) {
                 mapToSaveSession["time"] = timeReq.roomList[0].time!!.first.toString() + " " + timeReq.roomList[0].time!!.second.toString()
             }
 
-            val typeReq = requestHandler.handleRequestType(type?.toString()?.substring(1, type.toString().length - 1) ?: "")
+            val typeReq = requestHandler.getTypeFromRequest(removeQuotations(type?: ""))
             if (typeReq.error != ErrorTypeResponce.NO_TYPE) {
                 mapToSaveSession["room"] = typeReq.roomList[0].type.toString()
             }
@@ -252,6 +252,7 @@ class MainScenario (
                 reactions.go("say_type")
             } else {
                 println("все ок")
+                //TODO: зачем val(s, s1)
                 val (s, s1) = reactions.say("Окей, бронирую")
                 val listOfRoom =
                     requestHandler.handleRequest(
@@ -291,10 +292,10 @@ class MainScenario (
         reactions.alice?.sessionState(json)
     }
 
-    private fun saveToSession(parametr: String, value: String, reactions: Reactions, request: BotRequest) {
+    private fun saveToSession(parameter: String, value: String, reactions: Reactions, request: BotRequest) {
         val mapJson = HashMap<String, JsonElement>()
         val par = JsonPrimitive(value)
-        mapJson[parametr] = par
+        mapJson[parameter] = par
         val objectJ = request.alice?.state?.session
         if (!objectJ.isNullOrEmpty()) for (key in objectJ.keys) {
             mapJson[key] = objectJ[key]!!
@@ -303,10 +304,10 @@ class MainScenario (
         reactions.alice?.sessionState(json)
     }
 
-    private fun saveToApplication(parametr: String, value: String, reactions: Reactions) {
+    private fun saveToApplication(parameter: String, value: String, reactions: Reactions) {
         val mapJson = HashMap<String, JsonElement>()
         val par = JsonPrimitive(value)
-        mapJson[parametr] = par
-        reactions.alice?.updateUserState(parametr, par)
+        mapJson[parameter] = par
+        reactions.alice?.updateUserState(parameter, par)
     }
 }
