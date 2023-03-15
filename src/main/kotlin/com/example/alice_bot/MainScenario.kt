@@ -268,9 +268,9 @@ class MainScenario (
                     reactions.alice?.endSession()
                 } else {
                     reactions.say(
-                        "Юзер хочет забронировать на месте ${place?.toString() ?: "null"} " +
-                                "во время ${time?.toString() ?: "null"} " +
-                                "вот это: ${type?.toString() ?: "null"}"
+                        "Забронировала ${type?.toString()} номер ${listOfRoom[0]}" +
+                                " на ${place?.toString()} " +
+                                "во время ${time?.toString()} "
                     )
                     reactions.alice?.endSession()
                 }

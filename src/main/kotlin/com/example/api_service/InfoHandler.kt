@@ -68,20 +68,25 @@ object InfoHandler {
 
     }
     //time in format 8:30
-    fun getFreeRooms(place: Place, time: String, date: String, type: RoomType) : ArrayList<Int>{
+    fun getFreeRooms(place: Place, time: String, date: String, type: RoomType) : List<Int>{
         val freeList  = ArrayList<Int>()
         if (place == Place.KRONVERSKY) {
             if (type == RoomType.AUDIENCE) {
-
-                return getFreeList(KronvAuditorium, time, date) //todo map aud
+                    return listOf(1)
+//                return getFreeList(KronvAuditorium, time, date) //todo map aud
+            } else {
+                return emptyList()
+//                return getFreeList(KronvCovorkingAud, time, date)
             }
-            if(type == RoomType.MEETINGROOM) {
-                return getFreeList(KronvCovorkingAud, time, date)
-
+        } else {
+            if (type == RoomType.AUDIENCE) {
+                return listOf(1)
+//                return getFreeList(KronvAuditorium, time, date) //todo map aud
+            } else {
+                return emptyList()
+//                return getFreeList(KronvCovorkingAud, time, date)
             }
         }
-        return ArrayList()
-
     }
 
     private fun getFreeList(aud: HashMap<Int, Int>, time: String, date: String): ArrayList<Int> {

@@ -11,10 +11,11 @@ import java.util.Date
 class RequestHandler {
     private val infoHandler : InfoHandler = InfoHandler;
     fun makeRequest(place: Place, time: String, date: String, type: RoomType): List<Int> {
-        infoHandler.checkInstance()
+//        infoHandler.checkInstance()
         return infoHandler.getFreeRooms(place, time, date, type)
 //        println(ans)
 //        infoHandler.register()
+//        return listOf(1)
     }
     fun handleRequest(place: Place, month: Month, day: Int, time: Pair<Int, Int>, type: RoomType): List<Int> {
         val timeString = time.first.toString() + ":" + time.second.toString() + "0-" + time.first.toString() + ":" + (time.second + 30).toString()
