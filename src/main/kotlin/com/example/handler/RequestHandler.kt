@@ -2,7 +2,12 @@ package com.example.handler
 
 import com.example.api_service.InfoHandler
 import com.example.models.*
+import com.example.util.checkDay
+import com.example.util.convertDateToDDMMYYYYFormat
+import com.example.util.convertTimeToHHMMSSFormat
 import java.text.DateFormatSymbols
+import java.time.Duration
+import java.time.LocalDate
 import java.time.Month
 import java.util.Date
 
@@ -10,46 +15,13 @@ import java.util.Date
 
 class RequestHandler {
     private val infoHandler : InfoHandler = InfoHandler;
-    fun makeRequest(place: Place, time: String, date: String, type: RoomType): List<Int> {
-//        infoHandler.checkInstance()
-        return infoHandler.getFreeRooms(place, time, date, type)
-//        println(ans)
-//        infoHandler.register()
-//        return listOf(1)
-    }
-    fun handleRequest(place: Place, month: Month, day: Int, time: Pair<Int, Int>, type: RoomType): List<Int> {
-        val timeString = time.first.toString() + ":" + time.second.toString() + "0-" + time.first.toString() + ":" + (time.second + 30).toString()
+    fun bookRoom(room: Room): List<Int> {
+        val timeString = convertTimeToHHMMSSFormat(room.time!!)
         println(timeString)
-        val dateString = day.toString() + ".0" + month.value + "." + "2023"
+        val dateString = convertDateToDDMMYYYYFormat(room.day!!, room.month!!)
         println(dateString)
-        return makeRequest(place, timeString, dateString, type)
+        return infoHandler.getFreeRooms(room.place!!, timeString, dateString, room.type)
     }
-//    fun handleRequest(place: String, time: String, month: String, day: String, type: String): RoomResponce {
-//        val placeToBook: Place = Place.parseVal(place)
-//        val dateToBook: Date? = parseDate(month, day)
-//        val timeToBook: Pair<Int, Int>? = parseTime(time)
-//        val typeToBook: RoomType = RoomType.parseVal(type)
-//        if (placeToBook != Place.NONE && timeToBook != null && dateToBook != null && typeToBook != RoomType.NONE) {
-//            val roomList = InfoHandler.getFreeRoomByDateAndTime(
-//                Room(
-//                    place = placeToBook,
-//                    time = timeToBook,
-//                    day = day.toInt(),
-//                    month = Month.valueOf(month)
-//                )
-//            )
-//            return RoomResponce(roomList, ErrorTypeResponce.SUCCESS)
-//        } else if (placeToBook == Place.NONE) {
-//            return RoomResponce(emptyList(), ErrorTypeResponce.NO_PLACE)
-//        } else if (timeToBook == null) {
-//            return RoomResponce(emptyList(), ErrorTypeResponce.NO_TIME)
-//        } else if (dateToBook == null) {
-//            return RoomResponce(emptyList(), ErrorTypeResponce.NO_DATE)
-//        } else if (typeToBook == RoomType.NONE) {
-//            return RoomResponce(emptyList(), ErrorTypeResponce.NO_TYPE)
-//        }
-//        return RoomResponce(emptyList(), ErrorTypeResponce.NO_PLACE)
-//    }
 
     private fun parseTime(strTime: String): Pair<Int, Int>? {
         val timeArray = strTime.split(" ")
@@ -60,17 +32,8 @@ class RequestHandler {
         }
     }
 
-//    private fun parseDate(month: String, day: String): Date? {
-//        val monthToBook: Month? = Month.valueOf(month.toUpperCase())
-//        val dayToBook: Int? = if (day != null && day.toIntOrNull() != null) day.toInt() else null
-//        if (monthToBook != null && dayToBook != null) {
-//            return Date(2023, monthToBook.value, dayToBook)
-//        }
-//        return null
-//    }
-
     fun getPlaceFromRequest(place: String): RoomResponce {
-        val placeToBook: Place = if (place.isNotEmpty()) Place.NONE else Place.parseVal(place)
+        val placeToBook: Place = if (place.isEmpty()) Place.NONE else Place.parseVal(place)
         if (placeToBook != Place.NONE) {
             return RoomResponce(listOf(Room(placeToBook, null, null)), ErrorTypeResponce.SUCCESS)
         }
@@ -79,17 +42,28 @@ class RequestHandler {
 
     fun getTimeFromRequest(time: String): RoomResponce {
         val timeToBook: Pair<Int, Int>? = parseTime(time)
-        if (timeToBook != null) {
+        if (timeToBook != null && isRightTimeToBook(timeToBook)) {
             return RoomResponce(listOf(Room(null, timeToBook, null)), ErrorTypeResponce.SUCCESS)
         }
         return RoomResponce(emptyList(), ErrorTypeResponce.NO_TIME)
     }
 
+    private fun isRightTimeToBook(time: Pair<Int, Int>): Boolean {
+        return time.first in 8..21 && time.second in 0..59
+    }
+//FIXME: check
+    private fun isRightDateToBook(month: Month, day: Int): Boolean {
+        val dateToBook = LocalDate.of(2023, month, day)
+        return dateToBook.isAfter(LocalDate.now().minusDays(1)) && dateToBook.isBefore(LocalDate.now().plusDays(8))
+    }
+
     fun getMonthAndDayFromRequest(month: String, day: String): RoomResponce {
         val monthToBook: Month? = if (month.isNotEmpty()) Month.valueOf(month.toUpperCase()) else null
         val dayToBook: Int? = if (day.toIntOrNull() != null) day.toInt() else null
-
-        if (monthToBook != null && dayToBook != null) {
+        if (monthToBook != null
+            && dayToBook != null
+            && monthToBook.checkDay(dayToBook)
+            && isRightDateToBook(monthToBook, dayToBook)) {
             return RoomResponce(listOf(Room(day = dayToBook, month = monthToBook)), ErrorTypeResponce.SUCCESS)
         }
         return RoomResponce(emptyList(), ErrorTypeResponce.NO_TIME)

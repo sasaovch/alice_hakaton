@@ -2,7 +2,11 @@ package com.example.alice_bot
 
 import com.example.handler.RequestHandler
 import com.example.models.ErrorTypeResponce
+import com.example.models.Room
+import com.example.models.RoomRequest
 import com.example.models.RoomResponce
+import com.example.util.convertTimeToRussion
+import com.example.util.convertTimeToString
 import com.example.util.removeQuotations
 import com.justai.jaicf.api.BotRequest
 import com.justai.jaicf.channel.yandexalice.activator.alice
@@ -28,10 +32,34 @@ class MainScenario (
 
             action {
                 reactions.sayRandom(
-                    "Привет! Хотите забронировать аудиторию?",
-                    "Я могу подать заявку на бронь аудитории, также рассказать о доступных вариантах для бронирования.",
-                    "Я могу помочь вам в бронировании аудитории, и сказать список доступных на определенный момент времени",
-                    "Я могу помочь вам с подбором аудитории"
+                    "Привет! Мы поможем подать заявку на бронь помещения в корпусах университета ИТМО. Для этого вы можете просто сказать слово забронировать",
+                    "Привет! Мы поможем вам в бронировании помещения в корпусах университета ИТМО. Вы можете сказать слово забронировать для начала или использовать запрос с параметрами. Например: забронируй аудитории на Ломоносова на дату во время"
+                )
+            }
+        }
+
+        state("help") {
+            activators {
+                regex("/help")
+                intent("help")
+            }
+
+            action {
+                reactions.sayRandom(
+                    "Вы можете сказать: Забронируй аудиторию на Ломоносова на 8 марта на 15 00, или Забронируй переговорку на Кронверском проспекте на 10 февраля на 20 00, или просто слово забронируй и мы спросим вас о всех параметрах. Если вы указали неправильный параметр, можете просто повторить его или сказать слово назад"
+                )
+            }
+        }
+
+        state("what") {
+            activators {
+                regex("/what")
+                intent("what")
+            }
+
+            action {
+                reactions.sayRandom(
+                    "Это навык для бронирования помещений в корпусах университета ИМТО. На данный момент мы можем забронировать аудитории и переговорки на Ломоносова и Кронверкском проспекте. Чтобы начать скажите забронировать. Если вы укажите неправильный параметр, можете просто повторить его или сказать слово назад"
                 )
             }
         }
@@ -41,9 +69,8 @@ class MainScenario (
                 intent("book")
             }
             action {
-                println("main_book пошел")
                 try {
-                switcher(activator, reactions, request)
+                    switcher(activator, reactions, request)
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -55,20 +82,9 @@ class MainScenario (
                 }
 
                 action {
-                    println("ask_place")
                     val place = activator.alice?.slots?.get("place")?.value
-
                     val response = requestHandler.getPlaceFromRequest(removeQuotations(place!!))
-                    when (response.error) {
-                        ErrorTypeResponce.NO_PLACE -> {
-                            reactions.say("Не верный адрес. Доступно только Ломоносова 9 и Кронва 49")
-                            reactions.go("/say_place")
-                        }
-                        ErrorTypeResponce.SUCCESS -> {
-                            saveToSession("place", response.roomList[0].place.toString(), reactions, request)
-                        }
-                    }
-                    println("возвращение в /main_book после ask_place")
+                    saveToSession("place", response.roomList[0].place.toString(), reactions, request)
                     reactions.go("/main_book")
                 }
             }
@@ -79,22 +95,26 @@ class MainScenario (
                 }
 
                 action {
-                    println("ask_date")
                     val month = activator.alice?.slots?.get("month")?.value
                     val day = activator.alice?.slots?.get("day")?.value
 
                     val response = requestHandler.getMonthAndDayFromRequest(removeQuotations(month!!), day.toString())
                     when (response.error) {
-                        ErrorTypeResponce.NO_DATE -> reactions.say("Неправильная дата")
                         ErrorTypeResponce.SUCCESS -> {
                             saveToSession(
-                                mapOf("month" to response.roomList[0].month.toString(), "day" to response.roomList[0].day.toString()),
+                                mapOf(
+                                    "month" to response.roomList[0].month.toString(),
+                                    "day" to response.roomList[0].day.toString()
+                                ),
                                 reactions,
                                 request
                             )
                         }
+                        else -> {
+                            reactions.say("Неправильная дата. Мы можем забронировать только на будущую дату не дальше семи дней. Повторите, пожалуйста, на какую дату забронировать")
+                            saveToSession("state", "say_date", reactions, request)
+                        }
                     }
-                    println("back to main_book")
                     reactions.go("/main_book")
                 }
             }
@@ -105,17 +125,16 @@ class MainScenario (
                 }
 
                 action {
-                    println("ask_time")
                     val time = activator.alice?.slots?.get("time")?.value.toString()
 
                     val response = requestHandler.getTimeFromRequest(removeQuotations(time))
                     when (response.error) {
-                        ErrorTypeResponce.NO_TIME -> reactions.say("Неверное время")
-                        ErrorTypeResponce.SUCCESS -> {
-                            saveToSession("time", response.roomList.get(0).time!!.first.toString() + " " + response.roomList.get(0).time!!.second.toString(), reactions, request)
+                        ErrorTypeResponce.SUCCESS -> saveToSession("time", convertTimeToRussion(response.roomList[0].time!!), reactions, request)
+                        else -> {
+                            reactions.say("Вы выбрали не правильное время. Можно бронировать с 8 утра до 22 вечера")
+                            saveToSession("state", "say_time", reactions, request)
                         }
                     }
-                    println("go to mai_book")
                     reactions.go("/main_book")
                 }
 
@@ -127,36 +146,54 @@ class MainScenario (
                 }
 
                 action {
-                    println("ask_type")
                     val type = activator.alice?.slots?.get("room")?.value
                     val response = requestHandler.getTypeFromRequest(removeQuotations(type!!))
                     when (response.error) {
-                        ErrorTypeResponce.NO_TYPE -> reactions.say("Неверный тип: аудитория или переговорка")
-                        ErrorTypeResponce.SUCCESS -> {
-                            saveToSession("type", response.roomList[0].type.toString(), reactions, request)
+                        ErrorTypeResponce.SUCCESS -> saveToSession("type", response.roomList[0].type.toString(), reactions, request)
+                        else -> {
+                            reactions.say("Извините, на данный момент мы можем забронировать аудиторию или переговорку")
+                            saveToSession("state", "say_type", reactions, request)
                         }
                     }
-                    println("back to main_book")
                     reactions.go("/main_book")
+                }
+            }
+
+            state("back") {
+                activators {
+                    intent("back")
+                }
+                action {
+                    val state: String = removeQuotations(request.alice?.state?.session?.get("state")?: "")
+                    if (state != "") {
+                        when (state) {
+                            "say_place" -> reactions.go("/main_book/say_place")
+                            "say_time" -> reactions.go("/main_book/say_time")
+                            "say_date" -> reactions.go("/main_book/say_date")
+                            "say_type" -> reactions.go("/main_book/say_type")
+                        }
+                    }
+                    reactions.say("Вы еще не начали бронировать помещение")
                 }
             }
 
             state("say_place") {
                 action {
                     reactions.sayRandom("Пожалуйста, уточните корпус",
-                        "Окей, уточните тогда корпус, который вас интересует",
-                        "Хорошо, какой корпус хотите рассмотреть?"
+                        "Хорошо, уточните корпус, который вас интересует",
+                        "Хорошо, какой корпус вы хотите рассмотреть?"
                     )
+                    reactions.buttons("Ломоносова")
+                    reactions.buttons("Кронверкский")
                     reactions.changeState("/main_book/ask_place")
                 }
             }
             state("say_date") {
                 action {
                     reactions.sayRandom("Пожалуйста, уточните дату",
-                        "Хорошо, уточните тогда дату, которая вас интересует и время.",
-                        "Да, конечно, подскажите пожалуйста интересуемую вас дату.",
-                        "Хорошо, какая дата вас интересует?",
-                        "Окей, какую дату хотите рассмотреть?",
+                        "Хорошо, уточните дату, которая вас интересует",
+                        "Подскажите, пожалуйста, дату брони",
+                        "Хорошо, какая дата вам нужна?",
                     )
                     reactions.changeState("/main_book/ask_date")
                 }
@@ -164,120 +201,165 @@ class MainScenario (
             state("say_time") {
                 action {
                     reactions.sayRandom("Пожалуйста, уточните время",
-                        "Да, конечно, подскажите пожалуйста, на какое время в указанную ранее вами дату вам было бы удобно?",
-                        "Хорошо, уточните тогда интересуемое время для вас на указанную ранее дату.",
-                        "Хорошо, какое время вас интересует в указанную вами ранее дату?",
-                        "Окей, какое время хотите рассмотреть на указанную ранее дату?",
+                        "Подскажите, пожалуйста, на какое время вам было бы удобно?",
+                        "Хорошо, уточните интересуемое время",
+                        "Хорошо, какое время вам нужно?",
+                        "На какое время вы хотите забронировать?",
                     )
                     reactions.changeState("/main_book/ask_time")
                 }
             }
             state("say_type") {
                 action {
-                    reactions.sayRandom("Пожалуйста, уточните тип",
-                        "Да, конечно, подскажите пожалуйста, на какое время в указанную ранее вами дату вам было бы удобно?",
-                        "Хорошо, уточните тогда интересуемое время для вас на указанную ранее дату.",
-                        "Хорошо, какое время вас интересует в указанную вами ранее дату?",
-                        "Окей, какое время хотите рассмотреть на указанную ранее дату?",
+                    reactions.sayRandom("Пожалуйста, уточните вам нужна аудитория или переговорка",
+                        "Подскажите, пожалуйста, вам нужна аудитория или переговорка"
                     )
+                    reactions.buttons("Аудитория")
+                    reactions.buttons("Переговорка")
                     reactions.changeState("/main_book/ask_type")
                 }
             }
-
+            state("problem_place") {
+                action {
+                    saveToSession(emptyMap(), reactions, request)
+                    reactions.sayRandom("Неправильный адрес. Можно выбрать Ломоносова или Кронверкский"
+                    )
+                    reactions.buttons("Ломоносова")
+                    reactions.buttons("Кронверкский")
+                    reactions.changeState("/main_book/ask_place")
+                }
+            }
+            state("problem_time") {
+                action {
+                    saveToSession(emptyMap(), reactions, request)
+                    reactions.sayRandom("Неверное время. Пожалуйста, скажите числом час и минуты")
+                    reactions.changeState("/main_book/ask_time")
+                }
+            }
+            state("problem_date") {
+                action {
+                    saveToSession(emptyMap(), reactions, request)
+                    reactions.sayRandom("Вы указали неправильную дату. Пожалуйста, скажите месяц и число")
+                    reactions.changeState("/main_book/ask_date")
+                }
+            }
+            state("problem_type") {
+                action {
+                    saveToSession(emptyMap(), reactions, request)
+                    reactions.sayRandom("Неверный тип помещения. Можно забронировать аудиторию или переговорку")
+                    reactions.changeState("/main_book/ask_type")
+                }
+            }
         }
+
         fallback {
-            reactions.say("Не распарсилось")
+            val state: String = removeQuotations(request.alice?.state?.session?.get("state")?: "")
+            if (state != "") {
+                goToPreviousState(reactions, state)
+            } else {
+                reactions.say("К сожалению, мы вас не поняли. Для начала бронирования скажите забронировать")
+            }
         }
     }
 
-    private fun switcher(activator: ActivatorContext, reactions: Reactions, request: BotRequest) {
-            val slots = activator.alice?.slots
-            val state = request.alice?.state?.session
-
-            val mapToSaveSession = mutableMapOf<String, Any>()
-            val place = slots?.get("place")?.value?: state?.get("place")
-            val month = slots?.get("month")?.value?: state?.get("month")
-            val day = slots?.get("day")?.value?: state?.get("day")
-            val time = slots?.get("time")?.value?: state?.get("time")
-            val type = slots?.get("room")?.value?: state?.get("room")
-
-        println("Switcher")
-        println(place)
-        println(month)
-        println(day)
-        println(time)
-        println(type)
-//TODO: вынести код с 211 по 234 в отдельный метод
-            val placeReq = requestHandler.getPlaceFromRequest(removeQuotations(place?: ""))
-            if (placeReq.error != ErrorTypeResponce.NO_PLACE) {
-                mapToSaveSession["place"] = placeReq.roomList[0].place.toString()
-            }
-
-            var dateReq: RoomResponce? = null
-            if (month != null && day != null) {
-                dateReq = requestHandler.getMonthAndDayFromRequest(removeQuotations(month), removeQuotations(day))
-                if (dateReq.error != ErrorTypeResponce.NO_TIME) {
-                    mapToSaveSession["day"] = dateReq.roomList[0].day.toString()
-                    mapToSaveSession["month"] = dateReq.roomList[0].month.toString()
-                }
-            }
-
-            val timeReq = requestHandler.getTimeFromRequest(removeQuotations(time?: ""))
-            if (timeReq.error != ErrorTypeResponce.NO_TIME) {
-                mapToSaveSession["time"] = timeReq.roomList[0].time!!.first.toString() + " " + timeReq.roomList[0].time!!.second.toString()
-            }
-
-            val typeReq = requestHandler.getTypeFromRequest(removeQuotations(type?: ""))
-            if (typeReq.error != ErrorTypeResponce.NO_TYPE) {
-                mapToSaveSession["room"] = typeReq.roomList[0].type.toString()
-            }
-
-            saveToSession(mapToSaveSession, reactions, request)
-
-            if (placeReq.error == ErrorTypeResponce.NO_PLACE) {
-                println("корпуса нет")
-                reactions.say("Не уточнен корпус")
-                reactions.go("say_place")
-            } else if (month == null || day == null || dateReq!!.error == ErrorTypeResponce.NO_DATE) {
-                println("даты нет")
-                reactions.say("Не уточнена дата")
-                reactions.go("say_date")
-            } else if (timeReq.error == ErrorTypeResponce.NO_TIME) {
-                println("времени нет")
-                reactions.say("Не уточнено время")
-                reactions.go("say_time")
-            } else if (typeReq.error == ErrorTypeResponce.NO_TYPE) {
-                println("типа нет")
-                reactions.say("Не уточнен тип")
-                reactions.go("say_type")
-            } else {
-                println("все ок")
-                //TODO: зачем val(s, s1)
-                val (s, s1) = reactions.say("Окей, бронирую")
-                val listOfRoom =
-                    requestHandler.handleRequest(
-                        placeReq.roomList[0].place!!,
-                        dateReq.roomList[0].month!!,
-                        dateReq.roomList[0].day!!,
-                        timeReq.roomList[0].time!!,
-                        typeReq.roomList[0].type,
-                    )
-                if (listOfRoom.isEmpty()) {
-                    reactions.say(
-                        "Не удалось забронировать аудиторию, так как нет свободной"
-                    )
-                    reactions.alice?.endSession()
-                } else {
-                    reactions.say(
-                        "Забронировала ${type?.toString()} номер ${listOfRoom[0]}" +
-                                " на ${place?.toString()} " +
-                                "во время ${time?.toString()} "
-                    )
-                    reactions.alice?.endSession()
-                }
-            }
+    private fun goToPreviousState(reactions: Reactions, state: String) {
+        when (state) {
+            "say_place" -> reactions.go("/main_book/problem_place")
+            "say_time" -> reactions.go("/main_book/problem_time")
+            "say_date" -> reactions.go("/main_book/problem_date")
+            "say_type" -> reactions.go("/main_book/problem_type")
+        }
     }
+    private fun getRoomFromRequest(activator: ActivatorContext, request: BotRequest): RoomRequest {
+        val slots = activator.alice?.slots
+        val state = request.alice?.state?.session
 
+        val place = slots?.get("place")?.value?: state?.get("place")
+        val month = slots?.get("month")?.value?: state?.get("month")
+        val day = slots?.get("day")?.value?: state?.get("day")
+        val time = slots?.get("time")?.value?: state?.get("time")
+        val type = slots?.get("room")?.value?: state?.get("room")
+        return RoomRequest(place, month, day, time, type)
+    }
+    private fun handleRoomRequest(roomRequest: RoomRequest, mapToSaveSession: MutableMap<String, String>): RoomResponce {
+        var error: ErrorTypeResponce = ErrorTypeResponce.SUCCESS
+        val room = Room()
+
+        val typeReq = requestHandler.getTypeFromRequest(roomRequest.type)
+        if (typeReq.error != ErrorTypeResponce.NO_TYPE) {
+            mapToSaveSession["room"] = typeReq.roomList[0].type.toString()
+            room.type = typeReq.roomList[0].type
+        } else {
+            error = ErrorTypeResponce.NO_TYPE
+        }
+
+        val timeReq = requestHandler.getTimeFromRequest(roomRequest.time)
+        if (timeReq.error != ErrorTypeResponce.NO_TIME) {
+            mapToSaveSession["time"] = convertTimeToString(timeReq)
+            room.time = timeReq.roomList[0].time
+        } else {
+            error = ErrorTypeResponce.NO_TIME
+        }
+
+        if (roomRequest.dateIsCorrect()) {
+            val dateReq = requestHandler.getMonthAndDayFromRequest(roomRequest.month, roomRequest.day)
+            if (dateReq.error != ErrorTypeResponce.NO_DATE) {
+                mapToSaveSession["day"] = dateReq.roomList[0].day.toString()
+                mapToSaveSession["month"] = dateReq.roomList[0].month.toString()
+                room.day = dateReq.roomList[0].day
+                room.month = dateReq.roomList[0].month
+            } else {
+                error = ErrorTypeResponce.NO_DATE
+            }
+        } else {
+            error = ErrorTypeResponce.NO_DATE
+        }
+
+        val placeReq = requestHandler.getPlaceFromRequest(roomRequest.place)
+        if (placeReq.error != ErrorTypeResponce.NO_PLACE) {
+            mapToSaveSession["place"] = placeReq.roomList[0].place.toString()
+            room.place = placeReq.roomList[0].place
+        } else {
+            error = ErrorTypeResponce.NO_PLACE
+        }
+        return RoomResponce(listOf(room), error)
+    }
+    private fun switcher(activator: ActivatorContext, reactions: Reactions, request: BotRequest) {
+        val mapToSaveSession = mutableMapOf<String, String>()
+        val roomFromRequest = getRoomFromRequest(activator, request)
+        //Test is value save in map
+        val handleRequest = handleRoomRequest(roomFromRequest, mapToSaveSession)
+
+        when (handleRequest.error) {
+            ErrorTypeResponce.NO_PLACE -> mapToSaveSession["state"] = "say_place"
+            ErrorTypeResponce.NO_DATE -> mapToSaveSession["state"] = "say_date"
+            ErrorTypeResponce.NO_TIME -> mapToSaveSession["state"] = "say_time"
+            ErrorTypeResponce.NO_TYPE -> mapToSaveSession["state"] = "say_type"
+            else -> mapToSaveSession["state"] = ""
+        }
+        saveToSession(mapToSaveSession, reactions, request)
+        if (mapToSaveSession["state"].isNullOrEmpty()) {
+            createRequestToBookRoom(handleRequest.roomList[0], reactions)
+        } else {
+            reactions.go(mapToSaveSession["state"]!!)
+        }
+    }
+    private fun createRequestToBookRoom(roomToBook: Room, reactions: Reactions) {
+        val listOfRoom = requestHandler.bookRoom(roomToBook)
+        if (listOfRoom.isEmpty()) {
+            reactions.say(
+                "Не удалось забронировать ${roomToBook.type.getParentCase()}, так как нет свободного помещения"
+            )
+            reactions.alice?.endSession()
+        } else {
+            reactions.say(
+                "Отправили запрос на бронирование ${roomToBook.type.getParentCase()} номер ${listOfRoom[0]}" +
+                        " на ${roomToBook.place!!.getRepositionalCase()} " +
+                    "во время ${convertTimeToRussion(roomToBook.time!!)} "
+            )
+            reactions.alice?.endSession()
+        }
+    }
     private fun saveToSession(map: Map<String, Any>, reactions: Reactions, request: BotRequest) {
         val mapJson = HashMap<String, JsonElement>()
         val objectJ = request.alice?.state?.session
@@ -286,7 +368,9 @@ class MainScenario (
             mapJson[it.key] = par
         }
         if (!objectJ.isNullOrEmpty()) for (key in objectJ.keys) {
-            mapJson[key] = objectJ[key]!!
+            if (!mapJson.containsKey(key)) {
+                mapJson[key] = objectJ[key]!!
+            }
         }
         val json = JsonObject(mapJson)
         reactions.alice?.sessionState(json)
@@ -304,10 +388,10 @@ class MainScenario (
         reactions.alice?.sessionState(json)
     }
 
-    private fun saveToApplication(parameter: String, value: String, reactions: Reactions) {
-        val mapJson = HashMap<String, JsonElement>()
-        val par = JsonPrimitive(value)
-        mapJson[parameter] = par
-        reactions.alice?.updateUserState(parameter, par)
-    }
+//    private fun saveToApplication(parameter: String, value: String, reactions: Reactions) {
+//        val mapJson = HashMap<String, JsonElement>()
+//        val par = JsonPrimitive(value)
+//        mapJson[parameter] = par
+//        reactions.alice?.updateUserState(parameter, par)
+//    }
 }

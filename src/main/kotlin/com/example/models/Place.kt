@@ -16,4 +16,19 @@ enum class Place(names: List<String>) {
             }
         }
     }
+
+    public fun getNominativeCase(): String {
+        when (this) {
+            Place.KRONVERSKY -> return "Кронверский"
+            Place.LOMONOSOVA -> return "Ломоносова"
+            else -> return "корпус"
+        }
+    }
+    public fun getRepositionalCase(): String {
+        when (this) {
+            Place.KRONVERSKY -> return "Кронверском"
+            Place.LOMONOSOVA -> return "Ломоносова"
+            else -> return "корпус"
+        }
+    }
 }
