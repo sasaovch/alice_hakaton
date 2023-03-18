@@ -77,6 +77,14 @@ class RequestHandler {
         return RoomResponce(emptyList(), ErrorTypeResponce.NO_TYPE)
     }
 
+    fun getTodayFromRequest(today: String): RoomResponce {
+        val todayToBook: DayOfWeek = DayOfWeek.parseVal(today)
+        if (todayToBook != DayOfWeek.NONE) {
+            return RoomResponce(listOf(Room(today = todayToBook)), ErrorTypeResponce.SUCCESS)
+        }
+        return RoomResponce(emptyList(), ErrorTypeResponce.EMPTY)
+    }
+
 //    fun handleRequestNumber(number: Int?): RoomResponce {
 //        if (number != null) {
 //            return RoomResponce(listOf(Room(roomId = number)), ErrorTypeResponce.SUCCESS)
