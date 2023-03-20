@@ -1,9 +1,8 @@
 package com.example.booking
 
-import booking.BookingApi
+import com.example.cookie.CookieHandler
 import com.example.util.EncodingInterceptor
 import com.example.util.LoggingInterceptor
-import cookies.CookieHandler
 import okhttp3.OkHttpClient
 import org.apache.commons.text.StringEscapeUtils
 import retrofit2.Retrofit

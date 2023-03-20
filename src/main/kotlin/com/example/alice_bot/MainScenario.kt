@@ -326,7 +326,6 @@ class MainScenario (
         } else {
             error = ErrorTypeResponse.NO_TIME
         }
-//FIXME: add today to date request
         val todayReq = requestHandler.getTodayFromRequest(roomRequest.today)
         if (todayReq.error != ErrorTypeResponse.EMPTY) {
             mapToSaveSession["today"] = todayReq.roomList[0].today.toString()

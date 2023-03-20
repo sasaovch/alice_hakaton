@@ -1,6 +1,7 @@
 package com.example
-import booking.BookingHandler
-import cookies.CookieHandler
+import com.example.api_service.AuthorizationHandler
+import com.example.booking.BookingHandler
+import com.example.cookie.CookieHandler
 import info.InfoHandler
 import java.net.URLEncoder
 

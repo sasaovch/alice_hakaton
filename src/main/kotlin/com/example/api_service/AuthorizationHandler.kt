@@ -1,6 +1,6 @@
 package com.example.api_service
 
-import cookies.CookieHandler
+import com.example.cookie.CookieHandler
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

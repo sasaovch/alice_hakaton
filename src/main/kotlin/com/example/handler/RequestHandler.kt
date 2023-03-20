@@ -35,17 +35,17 @@ class RequestHandler {
     fun getPlaceFromRequest(place: String): RoomResponce {
         val placeToBook: Place = if (place.isEmpty()) Place.NONE else Place.parseVal(place)
         if (placeToBook != Place.NONE) {
-            return RoomResponce(listOf(Room(placeToBook, null, null)), ErrorTypeResponce.SUCCESS)
+            return RoomResponce(listOf(Room(placeToBook, null, null)), ErrorTypeResponse.SUCCESS)
         }
-        return RoomResponce(emptyList(), ErrorTypeResponce.NO_PLACE)
+        return RoomResponce(emptyList(), ErrorTypeResponse.NO_PLACE)
     }
 
     fun getTimeFromRequest(time: String): RoomResponce {
         val timeToBook: Pair<Int, Int>? = parseTime(time)
         if (timeToBook != null && isRightTimeToBook(timeToBook)) {
-            return RoomResponce(listOf(Room(null, timeToBook, null)), ErrorTypeResponce.SUCCESS)
+            return RoomResponce(listOf(Room(null, timeToBook, null)), ErrorTypeResponse.SUCCESS)
         }
-        return RoomResponce(emptyList(), ErrorTypeResponce.NO_TIME)
+        return RoomResponce(emptyList(), ErrorTypeResponse.NO_TIME)
     }
 
     private fun isRightTimeToBook(time: Pair<Int, Int>): Boolean {
@@ -64,32 +64,32 @@ class RequestHandler {
             && dayToBook != null
             && monthToBook.checkDay(dayToBook)
             && isRightDateToBook(monthToBook, dayToBook)) {
-            return RoomResponce(listOf(Room(day = dayToBook, month = monthToBook)), ErrorTypeResponce.SUCCESS)
+            return RoomResponce(listOf(Room(day = dayToBook, month = monthToBook)), ErrorTypeResponse.SUCCESS)
         }
-        return RoomResponce(emptyList(), ErrorTypeResponce.NO_TIME)
+        return RoomResponce(emptyList(), ErrorTypeResponse.NO_TIME)
     }
 
     fun getTypeFromRequest(type: String): RoomResponce {
         val typeToBook: RoomType = RoomType.parseVal(type)
         if (typeToBook != RoomType.NONE) {
-            return RoomResponce(listOf(Room(type = typeToBook)), ErrorTypeResponce.SUCCESS)
+            return RoomResponce(listOf(Room(type = typeToBook)), ErrorTypeResponse.SUCCESS)
         }
-        return RoomResponce(emptyList(), ErrorTypeResponce.NO_TYPE)
+        return RoomResponce(emptyList(), ErrorTypeResponse.NO_TYPE)
     }
 
     fun getTodayFromRequest(today: String): RoomResponce {
         val todayToBook: DayOfWeek = DayOfWeek.parseVal(today)
         if (todayToBook != DayOfWeek.NONE) {
-            return RoomResponce(listOf(Room(today = todayToBook)), ErrorTypeResponce.SUCCESS)
+            return RoomResponce(listOf(Room(today = todayToBook)), ErrorTypeResponse.SUCCESS)
         }
-        return RoomResponce(emptyList(), ErrorTypeResponce.EMPTY)
+        return RoomResponce(emptyList(), ErrorTypeResponse.EMPTY)
     }
 
 //    fun handleRequestNumber(number: Int?): RoomResponce {
 //        if (number != null) {
-//            return RoomResponce(listOf(Room(roomId = number)), ErrorTypeResponce.SUCCESS)
+//            return RoomResponce(listOf(Room(roomId = number)), ErrorTypeResponse.SUCCESS)
 //        }
-//        return RoomResponce(emptyList(), ErrorTypeResponce.NO_TYPE)
+//        return RoomResponce(emptyList(), ErrorTypeResponse.NO_TYPE)
 //    }
 //
 //    fun getMonth(month: Int): String? {

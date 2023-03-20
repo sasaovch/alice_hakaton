@@ -1,12 +1,12 @@
 package info
 
-import util_egor.LoggingInterceptor
+import com.example.util.LoggingInterceptor
+import com.example.util.ScheduleParser
+import com.example.util.ScheduledRoom
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
-import util_egor.ScheduleParser
-import util_egor.ScheduledRoom
 
 class InfoHandler(IsuApCookie: String) {
 

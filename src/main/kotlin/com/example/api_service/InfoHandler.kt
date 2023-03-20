@@ -62,10 +62,7 @@ object InfoHandler {
         )
         //no errors handling!
         parsed = parser.parseSchedule(response.execute().body()?.string(), roomId, date)
-
-
         return parsed
-
     }
     //time in format 8:30
     fun getFreeRooms(place: Place, time: String, date: String, type: RoomType) : List<Int>{
