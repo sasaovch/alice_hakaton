@@ -103,7 +103,7 @@ class MainScenario (
                     val today = activator.alice?.slots?.get("today")?.value
                     //TodayAndTomorrow
                     val responseForToday = requestHandler.getTodayFromRequest(removeQuotations(today?: ""))
-                    if (responseForToday.error == ErrorTypeResponce.SUCCESS) {
+                    if (responseForToday.error == ErrorTypeResponse.SUCCESS) {
                         val month = if (responseForToday.roomList[0].today == DayOfWeek.TODAY)  LocalDate.now().month else LocalDate.now().plusDays(1).month
                         val day = if (responseForToday.roomList[0].today == DayOfWeek.TODAY) LocalDate.now().dayOfMonth else LocalDate.now().plusDays(1).dayOfMonth
                         saveToSession(
@@ -118,7 +118,7 @@ class MainScenario (
                     } else {
                         val response = requestHandler.getMonthAndDayFromRequest(removeQuotations(month!!), day.toString())
                         when (response.error) {
-                            ErrorTypeResponce.SUCCESS -> {
+                            ErrorTypeResponse.SUCCESS -> {
                                 saveToSession(
                                     mapOf(
                                         "month" to response.roomList[0].month.toString(),
@@ -148,7 +148,7 @@ class MainScenario (
 
                     val response = requestHandler.getTimeFromRequest(removeQuotations(time))
                     when (response.error) {
-                        ErrorTypeResponce.SUCCESS -> saveToSession("time", convertTimeToRussion(response.roomList[0].time!!), reactions, request)
+                        ErrorTypeResponse.SUCCESS -> saveToSession("time", convertTimeToRussion(response.roomList[0].time!!), reactions, request)
                         else -> {
                             reactions.say("Вы выбрали не правильное время. Можно бронировать с 8 утра до 22 вечера")
                             saveToSession("state", "say_time", reactions, request)
@@ -168,7 +168,7 @@ class MainScenario (
                     val type = activator.alice?.slots?.get("room")?.value
                     val response = requestHandler.getTypeFromRequest(removeQuotations(type!!))
                     when (response.error) {
-                        ErrorTypeResponce.SUCCESS -> saveToSession("type", response.roomList[0].type.toString(), reactions, request)
+                        ErrorTypeResponse.SUCCESS -> saveToSession("type", response.roomList[0].type.toString(), reactions, request)
                         else -> {
                             reactions.say("Извините, на данный момент мы можем забронировать аудиторию или переговорку")
                             saveToSession("state", "say_type", reactions, request)
@@ -308,27 +308,27 @@ class MainScenario (
         return RoomRequest(place, month, day, time, type, today)
     }
     private fun handleRoomRequest(roomRequest: RoomRequest, mapToSaveSession: MutableMap<String, String>): RoomResponce {
-        var error: ErrorTypeResponce = ErrorTypeResponce.SUCCESS
+        var error: ErrorTypeResponse = ErrorTypeResponse.SUCCESS
         val room = Room()
 
         val typeReq = requestHandler.getTypeFromRequest(roomRequest.type)
-        if (typeReq.error != ErrorTypeResponce.NO_TYPE) {
+        if (typeReq.error != ErrorTypeResponse.NO_TYPE) {
             mapToSaveSession["room"] = typeReq.roomList[0].type.toString()
             room.type = typeReq.roomList[0].type
         } else {
-            error = ErrorTypeResponce.NO_TYPE
+            error = ErrorTypeResponse.NO_TYPE
         }
 
         val timeReq = requestHandler.getTimeFromRequest(roomRequest.time)
-        if (timeReq.error != ErrorTypeResponce.NO_TIME) {
+        if (timeReq.error != ErrorTypeResponse.NO_TIME) {
             mapToSaveSession["time"] = convertTimeToString(timeReq)
             room.time = timeReq.roomList[0].time
         } else {
-            error = ErrorTypeResponce.NO_TIME
+            error = ErrorTypeResponse.NO_TIME
         }
 //FIXME: add today to date request
         val todayReq = requestHandler.getTodayFromRequest(roomRequest.today)
-        if (todayReq.error != ErrorTypeResponce.EMPTY) {
+        if (todayReq.error != ErrorTypeResponse.EMPTY) {
             mapToSaveSession["today"] = todayReq.roomList[0].today.toString()
             room.month = if (todayReq.roomList[0].today == DayOfWeek.TODAY)  LocalDate.now().month else LocalDate.now().plusDays(1).month
             room.day = if (todayReq.roomList[0].today == DayOfWeek.TODAY) LocalDate.now().dayOfMonth else LocalDate.now().plusDays(1).dayOfMonth
@@ -337,26 +337,26 @@ class MainScenario (
         } else {
             if (roomRequest.dateIsCorrect()) {
                 val dateReq = requestHandler.getMonthAndDayFromRequest(roomRequest.month, roomRequest.day)
-                if (dateReq.error != ErrorTypeResponce.NO_DATE) {
+                if (dateReq.error != ErrorTypeResponse.NO_DATE) {
                     mapToSaveSession["day"] = dateReq.roomList[0].day.toString()
                     mapToSaveSession["month"] = dateReq.roomList[0].month.toString()
                     room.day = dateReq.roomList[0].day
                     room.month = dateReq.roomList[0].month
                 } else {
-                    error = ErrorTypeResponce.NO_DATE
+                    error = ErrorTypeResponse.NO_DATE
                 }
             } else {
-                error = ErrorTypeResponce.NO_DATE
+                error = ErrorTypeResponse.NO_DATE
             }
         }
 
 
         val placeReq = requestHandler.getPlaceFromRequest(roomRequest.place)
-        if (placeReq.error != ErrorTypeResponce.NO_PLACE) {
+        if (placeReq.error != ErrorTypeResponse.NO_PLACE) {
             mapToSaveSession["place"] = placeReq.roomList[0].place.toString()
             room.place = placeReq.roomList[0].place
         } else {
-            error = ErrorTypeResponce.NO_PLACE
+            error = ErrorTypeResponse.NO_PLACE
         }
         return RoomResponce(listOf(room), error)
     }
@@ -367,10 +367,10 @@ class MainScenario (
         val handleRequest = handleRoomRequest(roomFromRequest, mapToSaveSession)
 
         when (handleRequest.error) {
-            ErrorTypeResponce.NO_PLACE -> mapToSaveSession["state"] = "say_place"
-            ErrorTypeResponce.NO_DATE -> mapToSaveSession["state"] = "say_date"
-            ErrorTypeResponce.NO_TIME -> mapToSaveSession["state"] = "say_time"
-            ErrorTypeResponce.NO_TYPE -> mapToSaveSession["state"] = "say_type"
+            ErrorTypeResponse.NO_PLACE -> mapToSaveSession["state"] = "say_place"
+            ErrorTypeResponse.NO_DATE -> mapToSaveSession["state"] = "say_date"
+            ErrorTypeResponse.NO_TIME -> mapToSaveSession["state"] = "say_time"
+            ErrorTypeResponse.NO_TYPE -> mapToSaveSession["state"] = "say_type"
             else -> mapToSaveSession["state"] = ""
         }
         saveToSession(mapToSaveSession, reactions, request)
