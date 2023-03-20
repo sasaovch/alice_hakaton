@@ -1,5 +1,5 @@
 package com.example.models
 
-enum class ErrorTypeResponce {
+enum class ErrorTypeResponse {
     NO_PLACE, NO_TIME, NO_DATE, SUCCESS, NO_TYPE
 }

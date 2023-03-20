@@ -1,20 +1,10 @@
 package com.example.alice_bot
 
-import com.example.api_service.InfoHandler
 import com.example.handler.RequestHandler
-import com.example.models.ErrorTypeResponce
-import com.example.models.Place
-import com.example.models.Room
-import com.example.models.RoomResponce
+import com.example.models.ErrorTypeResponse
 import com.justai.jaicf.channel.yandexalice.activator.alice
-import com.justai.jaicf.channel.yandexalice.alice
 import com.justai.jaicf.channel.yandexalice.model.AliceEvent
 import com.justai.jaicf.model.scenario.Scenario
-import io.ktor.http.*
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import org.json.JSONObject
-import java.sql.Date
 
 /**
  * Этот файл содержит сценарий вашего навыка.
@@ -62,11 +52,11 @@ class MainScenario (
 
                     val responce = requestHandler.handleRequest(place.toString(), time.toString(), date.toString(), type.toString())
                     when (responce.error) {
-                        ErrorTypeResponce.NO_PLACE -> reactions.go("ask_place")
-                        ErrorTypeResponce.NO_DATE -> reactions.go("ask_date")
-                        ErrorTypeResponce.NO_TIME -> reactions.go("ask_time")
-                        ErrorTypeResponce.NO_TYPE -> reactions.go("ask_type")
-                        ErrorTypeResponce.SUCCESS -> reactions.say(
+                        ErrorTypeResponse.NO_PLACE -> reactions.go("ask_place")
+                        ErrorTypeResponse.NO_DATE -> reactions.go("ask_date")
+                        ErrorTypeResponse.NO_TIME -> reactions.go("ask_time")
+                        ErrorTypeResponse.NO_TYPE -> reactions.go("ask_type")
+                        ErrorTypeResponse.SUCCESS -> reactions.say(
                             "Юзер хочет забронировать на месте ${place?.toString() ?: "null"} " +
                                     "во время ${time?.toString() ?: "null"} " +
                                     "вот это: ${type?.toString() ?: "null"}"
@@ -97,8 +87,8 @@ class MainScenario (
 
                     val responce = requestHandler.handleRequestPlace(place.toString())
                     when (responce.error) {
-                        ErrorTypeResponce.NO_PLACE -> reactions.say("ask_place")
-                        ErrorTypeResponce.SUCCESS -> reactions.say(
+                        ErrorTypeResponse.NO_PLACE -> reactions.say("ask_place")
+                        ErrorTypeResponse.SUCCESS -> reactions.say(
                             "Юзер хочет забронировать на месте ${place?.toString() ?: "null"} "
                         )
                     }
@@ -118,8 +108,8 @@ class MainScenario (
 
                     val responce = requestHandler.handleRequestDate(date.toString())
                     when (responce.error) {
-                        ErrorTypeResponce.NO_DATE -> reactions.say("ask_place")
-                        ErrorTypeResponce.SUCCESS -> reactions.say(
+                        ErrorTypeResponse.NO_DATE -> reactions.say("ask_place")
+                        ErrorTypeResponse.SUCCESS -> reactions.say(
                             "Юзер хочет забронировать на месте ${date?.toString() ?: "null"} "
                         )
                     }
@@ -136,12 +126,12 @@ class MainScenario (
                     reactions.say("стейт спросить про время") // TODO remove
                     val time = activator.alice?.slots?.get("time").toString()
 
-                    val responce = requestHandler.handleRequestTime(time)
-                    when (responce.error) {
-                        ErrorTypeResponce.NO_TIME -> reactions.say("ask_place")
-                        ErrorTypeResponce.SUCCESS -> reactions.say(
-                            "Юзер хочет забронировать на месте ${time?.toString() ?: "null"} "
+                    val response = requestHandler.handleRequestTime(time)
+                    when (response.error) {
+                        ErrorTypeResponse.SUCCESS -> reactions.say(
+                            "Юзер хочет забронировать на месте ${time?: "null"} "
                         )
+                        else -> {reactions.say("ask_place")}
                     }
 
                     reactions.go("/main_book")
@@ -157,12 +147,12 @@ class MainScenario (
                 action {
                     val type = activator.alice?.slots?.get("place").toString()
 
-                    val responce = requestHandler.handleRequestType(type)
-                    when (responce.error) {
-                        ErrorTypeResponce.NO_TYPE -> reactions.say("ask_place")
-                        ErrorTypeResponce.SUCCESS -> reactions.say(
-                            "Юзер хочет забронировать на месте ${type?.toString() ?: "null"} "
+                    val response = requestHandler.handleRequestType(type)
+                    when (response.error) {
+                        ErrorTypeResponse.SUCCESS -> reactions.say(
+                            "Юзер хочет забронировать на месте ${type} "
                         )
+                        else -> {reactions.say("ask_place")}
                     }
 
                     reactions.go("/main_book")
