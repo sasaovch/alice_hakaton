@@ -5,7 +5,7 @@ entity ItmoPlace:
             гк
             главный корпус
             кронва
-            кронверкский (49)?
+            кронверкский (49 | проспект)?
         lomo:
             ломо
             ломоносова (9)?
@@ -30,6 +30,14 @@ entity BookDate:
     values:
         exact:
             $YANDEX.NUMBER (январь | февраль | март | апрель | май | июнь | июль | август | сентябрь | октябрь | ноябрь | декабрь)
+
+entity TodayAndTomorrow:
+    lemma: true
+    values:
+        today:
+            сегодня
+        tomorrow:
+            завтра
 
 entity BookTimeMonth:
     lemma: true

@@ -1,11 +1,32 @@
 slots:
     time:
         source: $Time
+    day:
+        type: YANDEX.NUMBER
+        source: $DayNumber
+    month:
+        type: BookTimeMonth
+        source: $Month
+    room:
+        type: PlaceType
+        source: $Type
+    place:
+        type: ItmoPlace
+        source: $Where
 
 
 root:
     %lemma
-    (на | в)? $Time
+    (на | в)? $Time [((в | на)? [$DayNumber $Month])? ($Type)? ((в | на)? $Where)?]
 
 $Time:
     $YANDEX.NUMBER $YANDEX.NUMBER
+$DayNumber:
+    %lemma
+    $YANDEX.NUMBER
+$Month:
+    $BookTimeMonth
+$Where:
+    $ItmoPlace
+$Type:
+    $PlaceType
