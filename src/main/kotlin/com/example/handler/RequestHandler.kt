@@ -1,6 +1,6 @@
 package com.example.handler
 
-import com.example.api_service.InfoHandler
+import InfoHandler
 import com.example.models.*
 import com.example.util.checkDay
 import com.example.util.convertDateToDDMMYYYYFormat
@@ -14,13 +14,13 @@ import java.util.Date
 
 
 class RequestHandler {
-    private val infoHandler : InfoHandler = InfoHandler;
+    private val infoHandler : InfoHandler = InfoHandler("123");
     fun bookRoom(room: Room): List<Int> {
         val timeString = convertTimeToHHMMSSFormat(room.time!!)
         println(timeString)
         val dateString = convertDateToDDMMYYYYFormat(room.day!!, room.month!!)
         println(dateString)
-        return infoHandler.getFreeRooms(room.place!!, timeString, dateString, room.type)
+        return infoHandler.getFreeRooms(room.place!!, listOf(timeString), dateString, room.type)
     }
 
     private fun parseTime(strTime: String): Pair<Int, Int>? {

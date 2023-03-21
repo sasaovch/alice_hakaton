@@ -1,4 +1,4 @@
-package info
+package com.example.api_service
 
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -33,7 +33,7 @@ interface RoomInfoApi {
     @GET("/pls/apex/f?p=2431:4:1234:/")
     fun getHtmlWithPlugin(
         @Header("Cookie") cookie: String,
-        ): Call<ResponseBody>
+    ): Call<ResponseBody>
 
 
 
