@@ -4,19 +4,15 @@ import InfoHandler
 import com.example.models.*
 import com.example.util.checkDay
 import com.example.util.convertDateToDDMMYYYYFormat
-import com.example.util.convertTimeToHHMMSSFormat
-import java.text.DateFormatSymbols
-import java.time.Duration
+import com.example.util.convertTimeToHHMMFormat
 import java.time.LocalDate
 import java.time.Month
-import java.util.Date
-
 
 
 class RequestHandler {
     private val infoHandler : InfoHandler = InfoHandler("123");
     fun bookRoom(room: Room): List<Int> {
-        val timeString = convertTimeToHHMMSSFormat(room.time!!)
+        val timeString = convertTimeToHHMMFormat(room.time!!)
         println(timeString)
         val dateString = convertDateToDDMMYYYYFormat(room.day!!, room.month!!)
         println(dateString)

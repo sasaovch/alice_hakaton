@@ -8,5 +8,6 @@ data class Room(
     var month: Month? = null,
     var roomId: Int? = 0,
     var type: RoomType = RoomType.NONE,
-    var today: DayOfWeek = DayOfWeek.NONE
+    var today: DayOfWeek = DayOfWeek.NONE,
+    var duration: Int? = 30
 )

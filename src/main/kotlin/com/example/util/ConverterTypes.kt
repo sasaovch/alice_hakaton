@@ -16,15 +16,15 @@ fun convertTimeToRussion(timeRoom: Pair<Int, Int>): String {
     return timeRoom.first.toString() + ":" + timeRoom.second.toString()
 }
 
-fun convertTimeToHHMMSSFormat(time: Pair<Int, Int>): String {
+fun convertTimeToHHMMFormat(time: Pair<Int, Int>): String {
     if (time.second < 10) {
-        return time.first.toString() + ":0" + time.second.toString() + "-" + time.first.toString() + ":" + (time.second + 30).toString()
+        return time.first.toString() + ":0" + time.second.toString()
     } else if (time.second < 30) {
-        return time.first.toString() + ":" + time.second.toString() + "-" + time.first.toString() + ":" + (time.second + 30).toString()
+        return time.first.toString() + ":" + time.second.toString()
     } else if (time.second < 40){
-        return time.first.toString() + ":" + time.second.toString() + "-" + (time.first + 1).toString() + ":0" + (time.second / 10).toString()
+        return time.first.toString() + ":" + time.second.toString()
     } else {
-        return time.first.toString() + ":" + time.second.toString() + "-" + (time.first + 1).toString() + ":" + (time.second - 30).toString()
+        return time.first.toString() + ":" + time.second.toString()
     }
 }
 

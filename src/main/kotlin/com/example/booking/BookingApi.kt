@@ -43,4 +43,9 @@ interface BookingApi {
     fun book(
         @Field(value = "p_flow_id", encoded = true)  p_flow_id: String
     ): Call<ResponseBody>
+
+    @GET
+    fun redirectHandler(
+        @Url url: String,
+    ): Call<ResponseBody>
 }

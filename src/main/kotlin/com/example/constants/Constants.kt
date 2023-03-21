@@ -1,28 +1,32 @@
 package com.example.constants
 
+import com.example.models.Place
+import com.example.models.RoomType
+import java.lang.StringBuilder
+
 public final class Constants {
 
 
     companion object {
 
-        public final val LomoAud = hashMapOf<Int, Int>(
-            Pair(1121, 29), Pair(1122, 30), Pair(1123, 36), Pair(1124, 41),
-            Pair(1220, 73), Pair(1221, 77), Pair(1222, 82), Pair(1223, 84),
-            Pair(1224, 85), Pair(1226, 86), Pair(1310, 91), Pair(1315, 93),
-            Pair(2202, 95), Pair(2219, 145), Pair(2432, 200), Pair(3407, 215),
+        public final val LomoAud = linkedMapOf<Int, Int>(
+            Pair(1121, 13075), Pair(1122, 14143), Pair(1123, 13607), Pair(1124, 13609),
+            Pair(1220, 12997), Pair(1221, 13063), Pair(1222, 13611), Pair(1223, 13061),
+            Pair(1224, 14609), Pair(1226, 14579), Pair(1310, 12935), Pair(1315, 12939),
+            Pair(2202, 13491), Pair(2219, 13469), Pair(2432, 13251), Pair(3407, 12775),
             Pair(34071, 14181), Pair(3408, 12753), Pair(3412, 14183), Pair(4103, 12733),
             Pair(4202, 12661), Pair(4206, 12675), Pair(4207, 12677), Pair(4208, 12679),
-            Pair(4210, 12699), Pair(4213, 12683), Pair(4306, 12745), Pair(4307, 12669),
+            Pair(4210, 12699), Pair(4213, 12683), Pair(4306, 12745), Pair(4307, 12669)
         )
-        public final val KronvCovorkingAud =
-            hashMapOf<Int, Int>(Pair(1301, 18863), Pair(1311, 18865), Pair(1314, 18867), Pair(1312, 18871))
+        public final val KronvCoworkingAud =
+            linkedMapOf<Int, Int>(Pair(1301, 18863), Pair(1311, 18865), Pair(1314, 18867), Pair(1312, 18871))
 
 
-        public final val LomoCoworking = hashMapOf<Int, Int>(
+        public final val LomoCoworking = linkedMapOf<Int, Int>(
             Pair(1, 18851), Pair(2, 18849), Pair(3, 13167), Pair(4, 13161),
             Pair(5, 13159), Pair(6, 13153), Pair(7, 13155), Pair(8, 13165),
         )
-        public final val KronvAuditorium = hashMapOf<Int, Int>(
+        public final val KronvAuditorium = linkedMapOf<Int, Int>(
             Pair(2337, 29), Pair(2336, 30), Pair(2326, 36), Pair(2316, 41),
             Pair(1410, 73), Pair(1419, 77), Pair(2407, 82), Pair(2412, 84),
             Pair(2414, 85), Pair(2416, 86), Pair(2426, 91), Pair(2433, 93),
@@ -31,7 +35,7 @@ public final class Constants {
         )
 
 
-        public val IdToCapacity = hashMapOf<Int, Int>(
+        public val IdToCapacity = linkedMapOf<Int, Int>(
             //Kronv Aud
             Pair(29, 100),
             Pair(30, 46),
@@ -95,6 +99,68 @@ public final class Constants {
             Pair(13155, 8),
             Pair(13165, 80),
         )
+        public final val TypeToTimeType =
+            linkedMapOf<Pair<RoomType, Place>, Int>(Pair(Pair(RoomType.MEETINGROOM, Place.LOMONOSOVA), -812),
+                Pair(Pair(RoomType.MEETINGROOM, Place.KRONVERSKY), -603),
+                Pair(Pair(RoomType.AUDIENCE, Place.LOMONOSOVA), -17),
+                Pair(Pair(RoomType.AUDIENCE, Place.KRONVERSKY), -17))
+        public fun getStringOfRoomsIds(id: Int) : String {
+            var sb : StringBuilder = StringBuilder()
+            if(LomoAud.containsValue(id)) {
+                for(key in LomoAud.values) {
+                    if (sb.isNotEmpty()) {
+                        sb.append(',')
+                    }
+                    sb.append(key)
+                }
+                return sb.toString()
+            }
+            if(KronvAuditorium.containsValue(id)) {
+                for(key in KronvAuditorium.values) {
+                    if (sb.isNotEmpty()) {
+                        sb.append(',')
+                    }
+                    sb.append(key)
+                }
+                return sb.toString()
+            }
+            if(LomoCoworking.containsValue(id)) {
+                for(key in LomoCoworking.values) {
+                    if (sb.isNotEmpty()) {
+                        sb.append(',')
+                    }
+                    sb.append(key)
+                }
+                return sb.toString()
+            }
+            if(KronvCoworkingAud.containsValue(id)) {
+                for(key in KronvAuditorium.values) {
+                    if (sb.isNotEmpty()) {
+                        sb.append(',')
+                    }
+                    sb.append(key)
+                }
+                return sb.toString()
+            }
+            return ""
+
+        }
+        fun numToId(num: Int) : Int {
+            if(LomoCoworking.containsKey(num)) {
+                return LomoCoworking[num]!!
+            }
+            if(LomoAud.containsKey(num)) {
+                return LomoAud[num]!!
+            }
+            if(KronvAuditorium.containsKey(num)) {
+                return KronvAuditorium[num]!!
+            }
+            if(KronvCoworkingAud.containsKey(num)) {
+                return KronvCoworkingAud[num]!!
+            }
+            return -1
+        }
+
 
     }
 
