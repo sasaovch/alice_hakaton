@@ -1,22 +1,52 @@
 package com.example.handler
 
-import InfoHandler
+import com.example.api_service.AuthorizationHandler
+import com.example.api_service.InfoHandler
+import com.example.booking.BookingHandler
+import com.example.cookie.CookieHandler
 import com.example.models.*
 import com.example.util.checkDay
 import com.example.util.convertDateToDDMMYYYYFormat
-import com.example.util.convertTimeToHHMMFormat
+import com.example.util.convertTimeToHHMMSSFormat
+import java.text.DateFormatSymbols
+import java.time.Duration
 import java.time.LocalDate
 import java.time.Month
+import java.util.Collections
+import java.util.Date
+
 
 
 class RequestHandler {
-    private val infoHandler : InfoHandler = InfoHandler("123");
-    fun bookRoom(room: Room): List<Int> {
-        val timeString = convertTimeToHHMMFormat(room.time!!)
+    private val infoHandler : InfoHandler = InfoHandler;
+    fun getFreeRooms(room: Room): List<Room> {
+        val timeString = convertTimeToHHMMSSFormat(room.time!!)
         println(timeString)
         val dateString = convertDateToDDMMYYYYFormat(room.day!!, room.month!!)
         println(dateString)
-        return infoHandler.getFreeRooms(room.place!!, listOf(timeString), dateString, room.type)
+        val listOfId = infoHandler.getFreeRooms(room.place!!, timeString, dateString, room.type)
+        return listOfId.stream().map { it -> Room(room.place, room.time, room.day, room.month, it, room.type) }.limit(3).toList()
+    }
+
+    fun bookRoom(room: Room): List<Room> {
+        val cookies = CookieHandler();
+        val au = AuthorizationHandler(cookies)
+        val test1 = au.loginAndGetApCookie("LOGIN", "PASSWORD")
+        println(test1)
+        val infoHandler = info.InfoHandler("ISU_AP_COOKIE=$test1")
+        infoHandler.checkInstance()
+        val res2 =
+            infoHandler.getFreeRooms(info.InfoHandler.Place.KRONVA, "15:00-15:30", "25.03.2023", info.InfoHandler.Type.MEETING_ROOM)
+        println(res2)
+        val bookingHandler = BookingHandler(cookies, infoHandler.p_instance)
+        bookingHandler.test(room.roomId, convertDateToDDMMYYYYFormat(room.day!!, room.month!!), convertTimeToHHMMSSFormat(room.time!!), convertTimeToHHMMSSFormat(room.time!!))
+        return emptyList()
+//        val timeString = convertTimeToHHMMSSFormat(room.time!!)
+//        println(timeString)
+//        val dateString = convertDateToDDMMYYYYFormat(room.day!!, room.month!!)
+//        println(dateString)
+//        val listOfId = infoHandler.(room.place!!, timeString, dateString, room.type)
+//        return listOfId.stream().map { it -> Room(room.place, room.time, room.day, room.month, it, room.type) }.limit(3).toList()
     }
 
     private fun parseTime(strTime: String): Pair<Int, Int>? {
@@ -79,6 +109,14 @@ class RequestHandler {
             return RoomResponce(listOf(Room(today = todayToBook)), ErrorTypeResponse.SUCCESS)
         }
         return RoomResponce(emptyList(), ErrorTypeResponse.EMPTY)
+    }
+
+    fun getNumberFromRequest(number: String): RoomResponce {
+        val numberToBook: Int? = number.toIntOrNull()
+        if (numberToBook != null) {
+            return RoomResponce(listOf(Room(numberMem = numberToBook)), ErrorTypeResponse.SUCCESS)
+        }
+        return RoomResponce(emptyList(), ErrorTypeResponse.NO_NUMBER)
     }
 
 //    fun handleRequestNumber(number: Int?): RoomResponce {

@@ -1,0 +1,10 @@
+slots:
+    id:
+        type: YANDEX.NUMBER
+        source: $Id
+
+root:
+    $Id
+
+$Id:
+    $YANDEX.NUMBER
