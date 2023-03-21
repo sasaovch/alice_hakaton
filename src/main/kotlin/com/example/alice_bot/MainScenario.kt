@@ -44,7 +44,6 @@ class MainScenario(
         state("help") {
             activators {
                 regex("/help")
-//                intent("help")
                 intent("YANDEX.HELP")
             }
 
@@ -52,13 +51,14 @@ class MainScenario(
                 reactions.sayRandom(
                     "Вы можете сказать: Забронируй аудиторию на Ломоносова на 8 марта на 15 00, или Забронируй переговорку на Кронверском проспекте на 10 февраля на 20 00, или просто слово забронируй и мы спросим вас о всех параметрах. Если вы указали неправильный параметр, можете просто повторить его или сказать слово назад"
                 )
+                reactions.buttons("Помощь")
+                reactions.buttons("Что ты умеешь")
             }
         }
 
         state("what") {
             activators {
                 regex("/what")
-//                intent("what")
                 intent("YANDEX.WHAT_CAN_YOU_DO")
             }
 
@@ -66,6 +66,8 @@ class MainScenario(
                 reactions.sayRandom(
                     "Это навык для бронирования помещений в корпусах университета ИМТО. На данный момент мы можем забронировать аудитории и переговорки на Ломоносова и Кронверкском проспекте. Чтобы начать скажите забронировать. Если вы укажите неправильный параметр, можете просто повторить его или сказать слово назад"
                 )
+                reactions.buttons("Помощь")
+                reactions.buttons("Что ты умеешь")
             }
         }
 
@@ -244,6 +246,8 @@ class MainScenario(
                     val roomId = activator.alice?.slots?.get("id")?.value.toString().toInt()
                     println("$roomId this")
                     val list = getListRoom(reactions, request)
+//                    saveToSession("state", "say", reactions, request)
+
                     if (list.filter { it.roomId.equals(roomId) }.isNotEmpty()) {
                         println("Success")
 //                        reactions.go("/main_book")
@@ -271,13 +275,38 @@ class MainScenario(
                     val state: String = removeQuotations(request.alice?.state?.session?.get("state")?: "")
                     if (state != "") {
                         when (state) {
-                            "say_place" -> reactions.go("/help")
-                            "say_date" -> reactions.go("/main_book/say_place")
-                            "say_login" -> reactions.go("/main_book/say_login")
-                            "say_password" -> reactions.go("/main_book/say_password")
-                            "say_number" -> reactions.go("/main_book/say_number")
-                            "say_time" -> reactions.go("/main_book/say_type")
-                            "say_type" -> reactions.go("/main_book/say_date")
+                            "say_place" -> {
+                                saveToSession("state", "help", reactions, request)
+                                reactions.go("/help")
+                            }
+                            "say_date" -> {
+                                saveToSession("state", "say_place", reactions, request)
+                                reactions.go("/main_book/say_place")
+                            }
+                            "say_login" -> {
+                                saveToSession("state", "say_time", reactions, request)
+                                reactions.go("/main_book/say_time")
+                            }
+                            "say_password" -> {
+                                saveToSession("state", "say_login", reactions, request)
+                                reactions.go("/main_book/say_login")
+                            }
+                            "say_number" -> {
+                                saveToSession("state", "help", reactions, request)
+                                reactions.go("/main_book/say_number")
+                            }
+                            "say_time" -> {
+                                saveToSession("state", "say_type", reactions, request)
+                                reactions.go("/main_book/say_type")
+                            }
+                            "say_type" -> {
+                                saveToSession("state", "say_date", reactions, request)
+                                reactions.go("/main_book/say_date")
+                            }
+                            "say_time_for_room" -> {
+                                saveToSession("state", "say_type", reactions, request)
+                                reactions.go("/main_book/say_type")
+                            }
                             else -> reactions.say("Вы еще не начали бронировать помещение")
                         }
                     }
@@ -289,27 +318,11 @@ class MainScenario(
                     reactions.sayRandom(
                         "Пожалуйста, уточните свой логин от ису. Это нужно для системы регистрации"
                     )
+//                    saveToSession("state", "say_login", reactions, request)
                     reactions.changeState("/main_book/ask_login")
                 }
             }
 
-            state("say_login") {
-                action {
-                    reactions.sayRandom(
-                        "Пожалуйста, уточните свой пароль от ису."
-                    )
-                    reactions.changeState("/main_book/ask_password")
-                }
-            }
-
-            state("say_login") {
-                action {
-                    reactions.sayRandom(
-                        "Пожалуйста, введите свой номер телефона"
-                    )
-                    reactions.changeState("/main_book/ask_number")
-                }
-            }
 
             state("say_place") {
                 action {
@@ -320,7 +333,8 @@ class MainScenario(
                     reactions.buttons("Ломоносова")
                     reactions.buttons("Кронверкский")
                     reactions.buttons("Назад")
-                    reactions.changeState("/main_book/ask_place")
+//                    saveToSession("state", "say_place", reactions, request)
+                    reactions.changeState("/main_book")
                 }
             }
             state("say_date") {
@@ -331,7 +345,8 @@ class MainScenario(
                         "Хорошо, какая дата вам нужна?",
                     )
                     reactions.buttons("Назад")
-                    reactions.changeState("/main_book/ask_date")
+//                    saveToSession("state", "say_date", reactions, request)
+                    reactions.changeState("/main_book")
                 }
             }
             state("say_time") {
@@ -344,12 +359,14 @@ class MainScenario(
                         "На какое время вы хотите забронировать?",
                     )
                     reactions.buttons("Назад")
-                    reactions.changeState("/main_book/ask_time")
+//                    saveToSession("state", "say_time", reactions, request)
+                    reactions.changeState("/main_book")
                 }
             }
             state("say_time_for_room") {
                 action {
-                    val type = activator.alice?.slots?.get("room")?.value
+
+                    val type = activator.alice?.slots?.get("room")?.value?: request.alice?.state?.session?.get("room")
                     val response = requestHandler.getTypeFromRequest(removeQuotations(type!!))
                     when (response.error) {
                         ErrorTypeResponse.SUCCESS -> {
@@ -377,10 +394,11 @@ class MainScenario(
                             )
                         }
                     }
-                    saveToSession("state", "say_time", reactions, request)
+                    reactions.buttons("Назад")
+//                    saveToSession("state", "say_time", reactions, request)
 //                    reactions.go("/main_book")
 //                    reactions.buttons("Назад")
-                    reactions.changeState("/main_book/ask_time")
+                    reactions.changeState("/main_book")
                 }
             }
             state("say_type") {
@@ -391,7 +409,8 @@ class MainScenario(
                     reactions.buttons("Аудитория")
                     reactions.buttons("Переговорка")
                     reactions.buttons("Назад")
-                    reactions.changeState("/main_book/ask_type")
+//                    saveToSession("state", "say_type", reactions, request)
+                    reactions.changeState("/main_book")
                 }
             }
             state("problem_place") {
@@ -402,28 +421,31 @@ class MainScenario(
                     reactions.buttons("Ломоносова")
                     reactions.buttons("Кронверкский")
                     reactions.buttons("Назад")
-                    reactions.changeState("/main_book/ask_place")
+                    reactions.changeState("/main_book")
                 }
             }
             state("problem_time") {
                 action {
                     saveToSession(emptyMap(), reactions, request)
                     reactions.sayRandom("Неверное время. Пожалуйста, скажите числом час и минуты")
-                    reactions.changeState("/main_book/ask_time")
+                    reactions.changeState("/main_book")
                 }
             }
             state("problem_date") {
                 action {
                     saveToSession(emptyMap(), reactions, request)
                     reactions.sayRandom("Вы указали неправильную дату. Пожалуйста, скажите месяц и число")
-                    reactions.changeState("/main_book/ask_date")
+                    reactions.changeState("/main_book")
                 }
             }
             state("problem_type") {
                 action {
                     saveToSession(emptyMap(), reactions, request)
                     reactions.sayRandom("Неверный тип помещения. Можно забронировать аудиторию или переговорку")
-                    reactions.changeState("/main_book/ask_type")
+                    reactions.buttons("Аудитория")
+                    reactions.buttons("Переговорка")
+                    reactions.buttons("Назад")
+                    reactions.changeState("/main_book")
                 }
             }
         }
@@ -488,18 +510,22 @@ class MainScenario(
             if (timeType.error != ErrorTypeResponse.WRONG_TIME_FOR_TYPE) {
                 mapToSaveSession["time"] = convertTimeToString(timeReq)
                 mapToSaveSession["room"] = typeReq.roomList[0].type.toString()
+                room.type = typeReq.roomList[0].type
+                room.time = timeReq.roomList[0].time
             } else {
+                mapToSaveSession["room"] = typeReq.roomList[0].type.toString()
+                mapToSaveSession["time"] = ""
+                room.type = typeReq.roomList[0].type
                 error = ErrorTypeResponse.WRONG_TIME_FOR_TYPE
             }
-        }
-
-        if (timeReq.error != ErrorTypeResponse.NO_TIME) {
-            mapToSaveSession["time"] = convertTimeToString(timeReq)
-            room.time = timeReq.roomList[0].time
         } else if (typeReq.error != ErrorTypeResponse.NO_TYPE) {
             mapToSaveSession["room"] = typeReq.roomList[0].type.toString()
             room.type = typeReq.roomList[0].type
             error = ErrorTypeResponse.WRONG_TIME_FOR_TYPE
+        } else if (timeReq.error != ErrorTypeResponse.NO_TIME){
+            mapToSaveSession["time"] = convertTimeToString(timeReq)
+            room.time = timeReq.roomList[0].time
+            error = ErrorTypeResponse.NO_TYPE
         } else {
             error = ErrorTypeResponse.NO_TYPE
         }
@@ -542,6 +568,7 @@ class MainScenario(
         } else {
             error = ErrorTypeResponse.NO_PLACE
         }
+//        saveToSession(mapToSaveSession, reactions, request)
         return RoomResponce(listOf(room), error)
     }
 
@@ -600,17 +627,19 @@ class MainScenario(
             ErrorTypeResponse.NO_TYPE -> mapToSaveSession["state"] = "say_type"
             ErrorTypeResponse.NO_LOGIN -> mapToSaveSession["state"] = "say_login"
             ErrorTypeResponse.NO_PASSWORD -> mapToSaveSession["state"] = "say_password"
-            ErrorTypeResponse.NO_NUMBER ->  mapToSaveSession["state"] = "say_number"
+            ErrorTypeResponse.NO_PHONE ->  mapToSaveSession["state"] = "say_phone"
 
             ErrorTypeResponse.WRONG_TIME_FOR_TYPE -> mapToSaveSession["state"] = "say_time_for_room"
             else -> mapToSaveSession["state"] = ""
         }
+        println(activator.alice?.slots?.get("room")?.value)
         saveToSession(mapToSaveSession, reactions, request)
         if (mapToSaveSession["state"].isNullOrEmpty()) {
             createRequestToBookRoom(handleRequest.roomList[0], reactions, request)
         } else {
             reactions.go(mapToSaveSession["state"]!!)
         }
+        println(activator.alice?.slots?.get("room")?.value)
     }
     private fun bookRoom(roomToBook: Room, reactions: Reactions, request: BotRequest) {
         requestHandler.bookRoom(roomToBook)
