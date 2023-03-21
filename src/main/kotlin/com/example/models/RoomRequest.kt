@@ -9,7 +9,8 @@ data class RoomRequest(
     var day: String,
     var time: String,
     var type: String,
-    var today: String
+    var today: String,
+    val numberMembers: String
 ) {
     constructor(
         place: JsonElement?,
@@ -17,14 +18,16 @@ data class RoomRequest(
         day: JsonElement?,
         time: JsonElement?,
         type: JsonElement?,
-        today: JsonElement?
+        today: JsonElement?,
+        numberMembers: JsonElement?
     ) : this(
         removeQuotations(place?: ""),
         removeQuotations(month?: ""),
         removeQuotations(day?: ""),
         removeQuotations(time?: ""),
         removeQuotations(type?: ""),
-        removeQuotations(today?: "")
+        removeQuotations(today?: ""),
+        removeQuotations(numberMembers?: "")
     )
 
     public fun dateIsCorrect(): Boolean {

@@ -7,20 +7,23 @@ slots:
         source: $Month
     time:
         source: $Time
-    type:
+    room:
         type: PlaceType
         source: $Type
     place:
         type: ItmoPlace
         source: $Where
+    today:
+        type: TodayAndTomorrow
+        source: $TodayAndTomorrow
 
 root:
     %lemma
-    $BookWord ($Type)? [((в | на)? [$DayNumber $Month])? ((в | на)? $Time)? ((в | на)? $Where)?]
+    $BookWord [((в | на)? [$DayNumber $Month])? ($Type)? ((в | на)? $Time)? ((в | на)? $Where)? ((на)? $TodayAndTomorrow)?]
+
 $BookWord:
     %lemma
-    забронируй | забронь | бронь | подать заявку на бронь
-
+    забронируй | забронь | бронь | подать заявку на бронь | забронируй пожалуйста | забронировать
 $DayNumber:
     %lemma
     $YANDEX.NUMBER
@@ -30,8 +33,12 @@ $Time:
     %lemma
     $YANDEX.NUMBER $YANDEX.NUMBER
 $Where:
+    %lemma
     $ItmoPlace
-
-
 $Type:
+    %lemma
     $PlaceType
+
+$Today:
+    %lemma
+    $TodayAndTomorrow

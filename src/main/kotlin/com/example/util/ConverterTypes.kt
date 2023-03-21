@@ -7,7 +7,7 @@ fun convertTimeToString(time: RoomResponce): String {
     val minutes = time.roomList[0].time!!.second.toString()
     val hours = time.roomList[0].time!!.first.toString()
     if (minutes.length == 1) {
-        return "$hours $minutes 0"
+        return "$hours ${minutes}0"
     }
     return "$hours $minutes"
 }
