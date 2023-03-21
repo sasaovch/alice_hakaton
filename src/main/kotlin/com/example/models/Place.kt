@@ -1,6 +1,6 @@
 package com.example.models
 
-enum class Place(names: List<String>) {
+enum class Place(val names: List<String>) {
     LOMONOSOVA(listOf("Ломо", "Ломоносова 9")),
     KRONVERSKY(listOf("Кронва", "Кронверский 49")),
     NONE(emptyList());

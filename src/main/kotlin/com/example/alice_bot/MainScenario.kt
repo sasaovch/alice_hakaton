@@ -41,6 +41,21 @@ class MainScenario(
                 )
                 reactions.buttons("Помощь")
                 reactions.buttons("Что ты умеешь")
+                reactions.buttons("Какие аудитории у меня уже забронированы?")
+            }
+        }
+
+        state("info") {
+            activators {
+                regex("Какие аудитории у меня уже забронированы?")
+            }
+
+            action {
+                val booked = getRoomsFromApplicatoinState(request)
+                if (booked != null) {
+                    reactions.say("У вас есть забронированная аудитория на ${booked.place?.names?.firstOrNull()} " +
+                            "в ${booked.hour}:${booked.minute} на дату: ${booked.day}.${booked.month?.value}")
+                }
             }
         }
 
@@ -93,8 +108,15 @@ class MainScenario(
                 }
                 action {
                     val place = activator.alice?.slots?.get("place")?.value
-                    val response = requestHandler.getPlaceFromRequest(removeQuotations(place!!))
-                    saveToSession("place", response.roomList[0].place.toString(), reactions, request)
+                    val response = requestHandler.getPlaceFromRequest(
+                        removeQuotations(place!!)
+                    )
+                    saveToSession(
+                        "place",
+                        response.roomList[0].place.toString(),
+                        reactions,
+                        request
+                    )
                     reactions.go("/main_book")
                 }
             }
@@ -124,8 +146,10 @@ class MainScenario(
                             request
                         )
                     } else {
-                        reactions.say("Неправильная дата. Мы можем забронировать только на будущую дату не дальше семи дней.")
-                            saveToSession("state", "say_date", reactions, request)
+//                        reactions.say("Неправильная дата. Мы можем забронировать только на будущую дату не дальше семи дней.")
+//                            saveToSession("state", "say_date", reactions, request)
+                        reactions.say("Неправильная дата. Мы можем забронировать только на будущую дату не дальше семи дней. Повторите, пожалуйста, на какую дату забронировать")
+                        saveToSession("state", "say_date", reactions, request)
                     }
                     reactions.go("/main_book")
                 }
@@ -168,10 +192,23 @@ class MainScenario(
 
                     val response = requestHandler.getTimeFromRequest(removeQuotations(time))
                     when (response.error) {
-                        ErrorTypeResponse.SUCCESS -> saveToSession("time", convertTimeToRussion(response.roomList[0].time!!), reactions, request)
+                        ErrorTypeResponse.SUCCESS -> saveToSession(
+                            "time",
+                            convertTimeToRussion(response.roomList[0].time!!),
+                            reactions,
+                            request
+                        )
+
                         else -> {
                             reactions.say("Вы выбрали не правильное время. Можно бронировать с 8 утра до 22 вечера.")
-                            saveToSession("state", "say_time", reactions, request)
+//                            saveToSession("state", "say_time", reactions, request)
+//                            reactions.say("Вы выбрали не правильное время. Можно бронировать с 8 утра до 22 вечера")
+                            saveToSession(
+                                "state",
+                                "say_time",
+                                reactions,
+                                request
+                            )
                         }
                     }
                     reactions.go("/main_book")
@@ -188,10 +225,23 @@ class MainScenario(
                     val type = activator.alice?.slots?.get("room")?.value
                     val response = requestHandler.getTypeFromRequest(removeQuotations(type!!))
                     when (response.error) {
-                        ErrorTypeResponse.SUCCESS -> saveToSession("type", response.roomList[0].type.toString(), reactions, request)
+                        ErrorTypeResponse.SUCCESS -> saveToSession(
+                            "type",
+                            response.roomList[0].type.toString(),
+                            reactions,
+                            request
+                        )
+
                         else -> {
                             reactions.say("Извините, на данный момент мы можем забронировать аудиторию или переговорку.")
-                            saveToSession("state", "say_type", reactions, request)
+//                            saveToSession("state", "say_type", reactions, request)
+//                            reactions.say("Извините, на данный момент мы можем забронировать аудиторию или переговорку")
+                            saveToSession(
+                                "state",
+                                "say_type",
+                                reactions,
+                                request
+                            )
                         }
                     }
                     reactions.go("/main_book")
@@ -235,7 +285,12 @@ class MainScenario(
                 action {
                     val login = activator.alice?.slots?.get("login")?.value
                     println("Login ${login}")
-                    saveToApplication("login", login.toString(), reactions, request)
+                    saveToApplication(
+                        "login",
+                        login.toString(),
+                        reactions,
+                        request
+                    )
                     saveToSession(emptyMap(), reactions, request)
                     reactions.go("/main_book/say_password")
                 }
@@ -359,7 +414,8 @@ class MainScenario(
 
             state("say_place") {
                 action {
-                    reactions.sayRandom("Пожалуйста, уточните корпус",
+                    reactions.sayRandom(
+                        "Пожалуйста, уточните корпус",
                         "Хорошо, уточните корпус, который вас интересует",
                         "Хорошо, какой корпус вы хотите рассмотреть?"
                     )
@@ -371,7 +427,8 @@ class MainScenario(
             }
             state("say_date") {
                 action {
-                    reactions.sayRandom("Пожалуйста, уточните дату",
+                    reactions.sayRandom(
+                        "Пожалуйста, уточните дату",
                         "Уточните дату, которая вас интересует.",
                         "Подскажите, пожалуйста, дату брони.",
                         "Какая дата вам нужна?",
@@ -416,7 +473,8 @@ class MainScenario(
                             }
                         }
                         else -> {
-                            reactions.sayRandom("Пожалуйста, уточните время",
+                            reactions.sayRandom(
+                                "Пожалуйста, уточните время",
                                 "Подскажите, пожалуйста, на какое время вам было бы удобно?",
                                 "Хорошо, уточните интересуемое время",
                                 "Хорошо, какое время вам нужно?",
@@ -431,7 +489,8 @@ class MainScenario(
 
             state("say_type") {
                 action {
-                    reactions.sayRandom("Пожалуйста, уточните вам нужна аудитория или переговорка",
+                    reactions.sayRandom(
+                        "Пожалуйста, уточните вам нужна аудитория или переговорка",
                         "Подскажите, пожалуйста, вам нужна аудитория или переговорка"
                     )
                     reactions.buttons("Аудитория")
@@ -443,7 +502,8 @@ class MainScenario(
             state("problem_place") {
                 action {
                     saveToSession(emptyMap(), reactions, request)
-                    reactions.sayRandom("Неправильный адрес. Можно выбрать Ломоносова или Кронверкский"
+                    reactions.sayRandom(
+                        "Неправильный адрес. Можно выбрать Ломоносова или Кронверкский"
                     )
                     reactions.buttons("Ломоносова")
                     reactions.buttons("Кронверкский")
@@ -478,7 +538,9 @@ class MainScenario(
         }
 
         fallback {
-            val state: String = removeQuotations(request.alice?.state?.session?.get("state")?: "")
+            val state: String = removeQuotations(
+                request.alice?.state?.session?.get("state") ?: ""
+            )
             if (state != "") {
                 goToPreviousState(reactions, state)
             } else {
@@ -487,17 +549,24 @@ class MainScenario(
         }
     }
 
-    private fun getListRoom(reactions: Reactions, request: BotRequest): List<Room> {
+    private fun getListRoom(
+        reactions: Reactions,
+        request: BotRequest
+    ): List<Room> {
         val strList = request.alice?.state?.session?.get("rooms").toString()
         println(strList)
         println(strList.substring(1, strList.length - 1))
         println(strList.substring(1, strList.length - 1).replace("\\", ""))
-        val listRooms = Gson().fromJson(strList.substring(1, strList.length - 1).replace("\\", ""), Array<Room>::class.java).asList()
+        val listRooms = Gson().fromJson(
+            strList.substring(1, strList.length - 1).replace("\\", ""),
+            Array<Room>::class.java
+        ).asList()
         println("$listRooms that")
         return listRooms
     }
+
     private fun authUser(reactions: Reactions, request: BotRequest): Boolean {
-    return true
+        return true
     }
 
     private fun goToPreviousState(reactions: Reactions, state: String) {
@@ -508,43 +577,77 @@ class MainScenario(
             "say_type" -> reactions.go("/main_book/problem_type")
         }
     }
-    private fun getRoomFromRequest(activator: ActivatorContext, request: BotRequest): RoomRequest {
+
+    private fun getRoomFromRequest(
+        activator: ActivatorContext,
+        request: BotRequest
+    ): RoomRequest {
         val slots = activator.alice?.slots
         val state = request.alice?.state?.session
 
-        val place = slots?.get("place")?.value?: state?.get("place")
+        val place = slots?.get("place")?.value ?: state?.get("place")
         val month = removeQuotations(state?.get("month").toString())
-        val timeToBook = slots?.get("timeToBook")?.value?: state?.get("timeToBook")
+        val timeToBook =
+            slots?.get("timeToBook")?.value ?: state?.get("timeToBook")
         val day = removeQuotations(state?.get("day").toString())
         val hour = removeQuotations(state?.get("hour").toString())
         val minute = removeQuotations(state?.get("minute").toString())
-        val time = slots?.get("time")?.value?: state?.get("time")
-        val type = slots?.get("room")?.value?: state?.get("room")
-        val today = slots?.get("today")?.value?: state?.get("today")
-        val numMembers = slots?.get("number")?.value?: state?.get("number")
-        return RoomRequest(place, timeToBook, month, day, hour, minute, time, type, today, numMembers)
+        val time = slots?.get("time")?.value ?: state?.get("time")
+        val type = slots?.get("room")?.value ?: state?.get("room")
+        val today = slots?.get("today")?.value ?: state?.get("today")
+        val numMembers = slots?.get("number")?.value ?: state?.get("number")
+        return RoomRequest(
+            place,
+            timeToBook,
+            month,
+            day,
+            hour,
+            minute,
+            time,
+            type,
+            today,
+            numMembers
+        )
     }
-    private fun handleRoomRequest(roomRequest: RoomRequest, mapToSaveSession: MutableMap<String, String>): RoomResponce {
+
+    private fun handleRoomRequest(
+        roomRequest: RoomRequest,
+        mapToSaveSession: MutableMap<String, String>
+    ): RoomResponce {
         var error: ErrorTypeResponse = ErrorTypeResponse.SUCCESS
         val room = Room()
 
-        val numberReq = requestHandler.getNumberFromRequest(roomRequest.numberMembers)
+        val numberReq =
+            requestHandler.getNumberFromRequest(roomRequest.numberMembers)
         if (numberReq.error != ErrorTypeResponse.NO_NUMBER) {
-            mapToSaveSession["number"] = numberReq.roomList[0].numberMem.toString()
+            mapToSaveSession["number"] =
+                numberReq.roomList[0].numberMem.toString()
             room.numberMem = numberReq.roomList[0].numberMem
         } else {
             error = ErrorTypeResponse.NO_NUMBER
         }
 
-        val timeToBook = requestHandler.getTimeToBook(roomRequest.time, roomRequest.hour, roomRequest.minute, roomRequest.month, roomRequest.day)
+        val timeToBook = requestHandler.getTimeToBook(
+            roomRequest.time,
+            roomRequest.hour,
+            roomRequest.minute,
+            roomRequest.month,
+            roomRequest.day
+        )
 //        val timeReq = requestHandler.getTimeFromRequest(roomRequest.time)
         val typeReq = requestHandler.getTypeFromRequest(roomRequest.type)
         if (typeReq.error != ErrorTypeResponse.NO_TYPE && timeToBook.error != ErrorTypeResponse.NO_TIME && timeToBook.error != ErrorTypeResponse.EMPTY) {
-            val timeType = checkTimeForType(typeReq.roomList[0].type, timeToBook.roomList[0].hour!!, timeToBook.roomList[0].minute!!)
+            val timeType = checkTimeForType(
+                typeReq.roomList[0].type,
+                timeToBook.roomList[0].hour!!,
+                timeToBook.roomList[0].minute!!
+            )
             if (timeType.error != ErrorTypeResponse.WRONG_TIME_FOR_TYPE) {
 //                mapToSaveSession["time"] = convertTimeToString(timeReq)
-                mapToSaveSession["hour"] = timeToBook.roomList[0].hour.toString()
-                mapToSaveSession["minute"] = timeToBook.roomList[0].minute.toString()
+                mapToSaveSession["hour"] =
+                    timeToBook.roomList[0].hour.toString()
+                mapToSaveSession["minute"] =
+                    timeToBook.roomList[0].minute.toString()
                 mapToSaveSession["room"] = typeReq.roomList[0].type.toString()
                 room.type = typeReq.roomList[0].type
 //                room.time = timeReq.roomList[0].time
@@ -561,9 +664,10 @@ class MainScenario(
             mapToSaveSession["room"] = typeReq.roomList[0].type.toString()
             room.type = typeReq.roomList[0].type
             error = ErrorTypeResponse.WRONG_TIME_FOR_TYPE
-        } else if (timeToBook.error != ErrorTypeResponse.NO_TIME && timeToBook.error != ErrorTypeResponse.EMPTY){
+        } else if (timeToBook.error != ErrorTypeResponse.NO_TIME && timeToBook.error != ErrorTypeResponse.EMPTY) {
             mapToSaveSession["hour"] = timeToBook.roomList[0].hour.toString()
-            mapToSaveSession["minute"] = timeToBook.roomList[0].minute.toString()
+            mapToSaveSession["minute"] =
+                timeToBook.roomList[0].minute.toString()
             room.minute = timeToBook.roomList[0].minute
             room.hour = timeToBook.roomList[0].hour
             error = ErrorTypeResponse.NO_TYPE
@@ -593,7 +697,11 @@ class MainScenario(
         return RoomResponce(listOf(room), error)
     }
 
-    private fun checkTimeForType(type: RoomType, hour: Int, minute: Int): RoomResponce {
+    private fun checkTimeForType(
+        type: RoomType,
+        hour: Int,
+        minute: Int
+    ): RoomResponce {
         val setOfTime = setOf<Pair<Int, Int>>(
             Pair(8, 20),
             Pair(10, 0),
@@ -606,18 +714,35 @@ class MainScenario(
         )
         return if (type == RoomType.MEETINGROOM) {
             if (hour in 8..21 && minute % 30 == 0) {
-                RoomResponce(listOf(Room(type = type, minute = minute, hour = hour)), ErrorTypeResponse.SUCCESS)
+                RoomResponce(
+                    listOf(
+                        Room(
+                            type = type,
+                            minute = minute,
+                            hour = hour
+                        )
+                    ), ErrorTypeResponse.SUCCESS
+                )
             } else {
                 RoomResponce(emptyList(), ErrorTypeResponse.WRONG_TIME_FOR_TYPE)
             }
         } else {
             if (setOfTime.contains(Pair(hour, minute))) {
-                RoomResponce(listOf(Room(type = type, minute = minute, hour = hour)), ErrorTypeResponse.SUCCESS)
+                RoomResponce(
+                    listOf(
+                        Room(
+                            type = type,
+                            minute = minute,
+                            hour = hour
+                        )
+                    ), ErrorTypeResponse.SUCCESS
+                )
             } else {
                 RoomResponce(emptyList(), ErrorTypeResponse.WRONG_TIME_FOR_TYPE)
             }
         }
     }
+
     private fun getMonth(dayOfWeek: DayOfWeek): Month {
         return when (dayOfWeek) {
             DayOfWeek.TODAY -> LocalDate.now().month
@@ -635,21 +760,35 @@ class MainScenario(
             else -> LocalDate.now().dayOfMonth
         }
     }
-    private fun switcher(activator: ActivatorContext, reactions: Reactions, request: BotRequest) {
+
+    private fun switcher(
+        activator: ActivatorContext,
+        reactions: Reactions,
+        request: BotRequest
+    ) {
         val mapToSaveSession = mutableMapOf<String, String>()
         val roomFromRequest = getRoomFromRequest(activator, request)
         val handleRequest = handleRoomRequest(roomFromRequest, mapToSaveSession)
 
         when (handleRequest.error) {
-            ErrorTypeResponse.NO_PLACE -> mapToSaveSession["state"] = "say_place"
+            ErrorTypeResponse.NO_PLACE -> mapToSaveSession["state"] =
+                "say_place"
+
             ErrorTypeResponse.NO_DATE -> mapToSaveSession["state"] = "say_date"
             ErrorTypeResponse.NO_TIME -> mapToSaveSession["state"] = "say_time"
             ErrorTypeResponse.NO_TYPE -> mapToSaveSession["state"] = "say_type"
-            ErrorTypeResponse.NO_LOGIN -> mapToSaveSession["state"] = "say_login"
-            ErrorTypeResponse.NO_PASSWORD -> mapToSaveSession["state"] = "say_password"
-            ErrorTypeResponse.NO_PHONE ->  mapToSaveSession["state"] = "say_phone"
+            ErrorTypeResponse.NO_LOGIN -> mapToSaveSession["state"] =
+                "say_login"
 
-            ErrorTypeResponse.WRONG_TIME_FOR_TYPE -> mapToSaveSession["state"] = "say_time_for_room"
+            ErrorTypeResponse.NO_PASSWORD -> mapToSaveSession["state"] =
+                "say_password"
+
+            ErrorTypeResponse.NO_PHONE -> mapToSaveSession["state"] =
+                "say_phone"
+
+            ErrorTypeResponse.WRONG_TIME_FOR_TYPE -> mapToSaveSession["state"] =
+                "say_time_for_room"
+
             else -> mapToSaveSession["state"] = ""
         }
         saveToSession(mapToSaveSession, reactions, request)
@@ -663,13 +802,17 @@ class MainScenario(
         }
     }
 
-    private fun checkUserDateFromAppState(reactions: Reactions, request: BotRequest): User {
+    private fun checkUserDateFromAppState(
+        reactions: Reactions,
+        request: BotRequest
+    ): User {
         val loginR = request.alice?.state?.user?.get("login")
         val passworR = request.alice?.state?.user?.get("password")
         val phone = request.alice?.state?.user?.get("phone")
         if ((loginR == null || loginR.content == "null")
             || passworR == null || passworR.content == "null"
-            || phone == null || phone.content == "null") {
+            || phone == null || phone.content == "null"
+        ) {
             reactions.go("say_login")
             return User("", "", "")
         } else {
@@ -679,7 +822,28 @@ class MainScenario(
             return requestHandler.auth(User(loginR.content, passworR.content, phone.content))
         }
     }
-    private fun bookRoom(roomToBook: Room, reactions: Reactions, request: BotRequest): Boolean {
+
+    private fun getRoomsFromApplicatoinState(
+        request: BotRequest
+    ): Room? {
+        val roomsJson = request.alice?.state?.user?.get("room")
+
+        if (roomsJson == null) {
+            return null
+        }
+
+        val room =
+            request.alice?.state?.user?.get("room").toString().replace("\\", "")
+        val roomToBook = Gson().fromJson(room, Room::class.java)
+
+        return roomToBook
+    }
+
+    private fun bookRoom(
+        roomToBook: Room,
+        reactions: Reactions,
+        request: BotRequest
+    ): Boolean {
 //        requestHandler.bookRoom(roomToBook)
         return true
     }
@@ -705,7 +869,11 @@ class MainScenario(
         }
     }
 
-    private fun sayRooms(listOfRoom: List<Room>, reactions: Reactions, request: BotRequest) {
+    private fun sayRooms(
+        listOfRoom: List<Room>,
+        reactions: Reactions,
+        request: BotRequest
+    ) {
         var strSay = ""
         for (i in 0..(listOfRoom.size - 2)) {
             strSay += "${listOfRoom[i].roomId}, "
@@ -716,10 +884,15 @@ class MainScenario(
         saveToSession(listOfRoom, reactions, request)
         reactions.changeState("/main_book/ask_id")
     }
-    private fun saveToSession(map: Map<String, Any>, reactions: Reactions, request: BotRequest) {
+
+    private fun saveToSession(
+        map: Map<String, Any>,
+        reactions: Reactions,
+        request: BotRequest
+    ) {
         val mapJson = HashMap<String, JsonElement>()
         val objectJ = request.alice?.state?.session
-        map.forEach{
+        map.forEach {
             val par = JsonPrimitive(it.value.toString())
             mapJson[it.key] = par
         }
@@ -732,7 +905,12 @@ class MainScenario(
         reactions.alice?.sessionState(json)
     }
 
-    private fun saveToSession(parameter: String, value: String, reactions: Reactions, request: BotRequest) {
+    private fun saveToSession(
+        parameter: String,
+        value: String,
+        reactions: Reactions,
+        request: BotRequest
+    ) {
         val mapJson = HashMap<String, JsonElement>()
         val par = JsonPrimitive(value)
         mapJson[parameter] = par
@@ -744,7 +922,11 @@ class MainScenario(
         reactions.alice?.sessionState(json)
     }
 
-    private fun saveToSession(list: List<Room>, reactions: Reactions, request: BotRequest) {
+    private fun saveToSession(
+        list: List<Room>,
+        reactions: Reactions,
+        request: BotRequest
+    ) {
         val mapJson = HashMap<String, JsonElement>()
         val objectJ = request.alice?.state?.session
         val strJson = Gson().toJson(list)
@@ -768,12 +950,21 @@ class MainScenario(
         reactions.alice?.sessionState(json)
     }
 
-    private fun saveToApplication(parameter: String, value: String, reactions: Reactions, request: BotRequest) {
+    private fun saveToApplication(
+        parameter: String,
+        value: String,
+        reactions: Reactions,
+        request: BotRequest
+    ) {
         val par = JsonPrimitive(value)
         reactions.alice?.updateUserState(parameter, par)
     }
 
-    private fun saveToApplication(room: Room, reactions: Reactions, request: BotRequest) {
+    private fun saveToApplication(
+        room: Room,
+        reactions: Reactions,
+        request: BotRequest
+    ) {
         val strJson = Gson().toJson(room)
         reactions.alice?.updateUserState("room", JsonPrimitive(strJson))
     }
