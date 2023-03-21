@@ -17,15 +17,18 @@ fun convertTimeToRussion(timeRoom: Pair<Int, Int>): String {
 }
 
 fun convertTimeToHHMMFormat(time: Pair<Int, Int>): String {
+    var res: String
     if (time.second < 10) {
-        return time.first.toString() + ":0" + time.second.toString()
+        res = time.first.toString() + ":0" + time.second.toString()
     } else if (time.second < 30) {
-        return time.first.toString() + ":" + time.second.toString()
-    } else if (time.second < 40){
-        return time.first.toString() + ":" + time.second.toString()
+        res = time.first.toString() + ":" + time.second.toString()
+    } else if (time.second < 40) {
+        res = time.first.toString() + ":" + time.second.toString()
     } else {
-        return time.first.toString() + ":" + time.second.toString()
+        res = time.first.toString() + ":" + time.second.toString()
     }
+    return res
+
 }
 
 fun convertDateToDDMMYYYYFormat(day: Int, month: Month): String {

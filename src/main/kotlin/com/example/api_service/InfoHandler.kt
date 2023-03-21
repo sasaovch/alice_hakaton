@@ -1,7 +1,10 @@
 import com.example.api_service.LoggingInterceptor
 import com.example.api_service.RoomInfoApi
 import com.example.constants.Constants
-import com.example.models.*
+import com.example.models.Place
+import com.example.models.RoomType
+import com.example.models.ScheduleParser
+import com.example.models.ScheduledRoom
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -11,7 +14,8 @@ class InfoHandler(IsuApCookie: String) {
 
     private val isuApCookie: String = IsuApCookie
     private var pRequest: String = "PLUGIN="
-    private var pInstance: String = ""
+    var pInstance: String = ""
+
     private val pFlowId: String = "2431"
     val pFlowStepId: String = "4"
     val parser: ScheduleParser = ScheduleParser()
@@ -19,7 +23,6 @@ class InfoHandler(IsuApCookie: String) {
     fun setRequest(s: String) {
         pRequest = "PLUGIN=${s}"
     }
-
 
     private var client = OkHttpClient.Builder().addInterceptor(LoggingInterceptor()).followRedirects(true)
         .followSslRedirects(true).build()
@@ -160,21 +163,21 @@ class InfoHandler(IsuApCookie: String) {
                 if (place == Place.LOMONOSOVA && type == RoomType.MEETINGROOM) {
                     val filteredKeysMap = Constants.LomoCoworking.filterValues { it == id }
                     bigRooms.add(filteredKeysMap.keys.first())
-                } else
-                    if (place == Place.LOMONOSOVA && type == RoomType.AUDIENCE) {
-                        val filteredKeysMap = Constants.LomoAud.filterValues { it == id }
-                        bigRooms.add(filteredKeysMap.keys.first())
-                    } else
-                        if (place == Place.KRONVERSKY && type == RoomType.MEETINGROOM) {
-                            val filteredKeysMap = Constants.KronvCoworkingAud.filterValues { it == id }
-                            bigRooms.add(filteredKeysMap.keys.first())
+                }
+                if (place == Place.LOMONOSOVA && type == RoomType.AUDIENCE) {
+                    val filteredKeysMap = Constants.LomoAud.filterValues { it == id }
+                    bigRooms.add(filteredKeysMap.keys.first())
+                }
+                if (place == Place.KRONVERSKY && type == RoomType.MEETINGROOM) {
+                    val filteredKeysMap = Constants.KronvCoworkingAud.filterValues { it == id }
+                    bigRooms.add(filteredKeysMap.keys.first())
 
-                        } else
-                            if (place == Place.KRONVERSKY && type == RoomType.AUDIENCE) {
-                                val filteredKeysMap = Constants.KronvAuditorium.filterValues { it == id }
-                                bigRooms.add(filteredKeysMap.keys.first())
+                }
+                if (place == Place.KRONVERSKY && type == RoomType.AUDIENCE) {
+                    val filteredKeysMap = Constants.KronvAuditorium.filterValues { it == id }
+                    bigRooms.add(filteredKeysMap.keys.first())
 
-                            }
+                }
             }
         }
         return bigRooms
