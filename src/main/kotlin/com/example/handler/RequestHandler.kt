@@ -9,7 +9,12 @@ import com.example.util.TimeParser
 import com.example.util.checkDay
 import com.example.util.convertDateToDDMMYYYYFormat
 import com.example.util.convertTimeToHHMMFormat
+import com.example.util.convertTimeToHHMMSSFormat
+import com.google.gson.Gson
+import java.text.DateFormatSymbols
+import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.Month
 
 
@@ -104,6 +109,72 @@ object RequestHandler {
         }
     }
 
+    fun getTimeToBook(time: String, hour: String = "null", minute: String = "null", month: String = "null", day: String = "null"): RoomResponce {
+        val room = Room()
+        var error = ErrorTypeResponse.SUCCESS
+        val timeToBook = Gson().fromJson(time, TimeToBook::class.java)
+        if (timeToBook == null) {
+            if (hour != "null") {
+                room.hour = hour.toInt()
+            }
+            if (minute != "null") {
+                room.minute = minute.toInt()
+            }
+            if (month != "null") {
+                room.month = Month.valueOf(month)
+            }
+            if (day != "null") {
+                room.day = day.toInt()
+            }
+        } else {
+            if (timeToBook.hour != null) {
+                if (timeToBook.hour_is_relative) {
+                    room.hour = LocalTime.now().plusHours(timeToBook.hour).hour
+                } else {
+                    room.hour = timeToBook.hour.toInt()
+                }
+                room.minute = 0
+            } else if (hour != "null") {
+                room.hour = hour.toInt()
+            }
+            if (timeToBook.minute != null) {
+                if (timeToBook.minute_is_relative) {
+                    room.minute = LocalTime.now().plusMinutes(timeToBook.minute).minute
+                    room.hour = LocalTime.now().plusMinutes(timeToBook.minute).hour
+                } else {
+                    room.minute = timeToBook.minute.toInt()
+                }
+            } else if (minute != "null") {
+                room.minute = minute.toInt()
+            }
+            if (timeToBook.month != null) {
+                room.month = Month.of(timeToBook.month)
+            } else if (month != "null") {
+                room.month = Month.valueOf(month)
+            }
+            if (timeToBook.day != null) {
+                if (timeToBook.day_is_relative) {
+                    room.day = LocalDate.now().plusDays(timeToBook.day).dayOfMonth
+                    room.month = LocalDate.now().plusDays(timeToBook.day).month
+                } else {
+                    room.day = timeToBook.day.toInt()
+                }
+            } else if (day != "null") {
+                room.day = day.toInt()
+            }
+        }
+        if (room.minute == null || room.hour == null) {
+            error = ErrorTypeResponse.NO_TIME
+        }
+        if (room.day == null || room.month == null) {
+            error = ErrorTypeResponse.NO_DATE
+        }
+        if ((room.minute == null || room.hour == null) && (room.day == null || room.month == null)) {
+            error = ErrorTypeResponse.EMPTY
+        }
+        return RoomResponce(listOf(room), error)
+    }
+
     fun getPlaceFromRequest(place: String): RoomResponce {
         val placeToBook: Place = if (place.isEmpty()) Place.NONE else Place.parseVal(place)
         if (placeToBook != Place.NONE) {
@@ -124,7 +195,7 @@ object RequestHandler {
         return time.first in 8..21 && time.second in 0..59
     }
 //FIXME: check
-    private fun isRightDateToBook(month: Month, day: Int): Boolean {
+    fun isRightDateToBook(month: Month, day: Int): Boolean {
         val dateToBook = LocalDate.of(2023, month, day)
         return dateToBook.isAfter(LocalDate.now().minusDays(1)) && dateToBook.isBefore(LocalDate.now().plusDays(8))
     }
