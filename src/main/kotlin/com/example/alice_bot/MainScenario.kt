@@ -251,6 +251,8 @@ class MainScenario(
                         saveToSession(emptyMap(), reactions, request)
                         if (bookRoom(list.first { it.roomId == roomId }, reactions, request)) {
                             saveToApplication(list.first { it.roomId == roomId }, reactions, request)
+                            //FIXME: bookRoom(list.getByIt(roomId))
+                            //if true
                             reactions.go("/main_book/congratulations")
                         }
                     } else {
@@ -663,6 +665,10 @@ class MainScenario(
             reactions.go("say_login")
             return User("pass", "pass", "pass")
         } else {
+            //FIXME: auth
+            // if true login passw
+            // else user with empty
+            // requhad.aut(user)
             return User(loginR.content, passworR?.content?: "", phone?.content?: "")
         }
     }
@@ -672,6 +678,8 @@ class MainScenario(
     }
 
     private fun createRequestToBookRoom(roomToBook: Room, reactions: Reactions, request: BotRequest) {
+//
+//        get list of audito
 //        val listOfRoom = requestHandler.getFreeRooms(roomToBook)
         val listOfRoom = listOf(roomToBook)
         if (listOfRoom.isEmpty()) {
