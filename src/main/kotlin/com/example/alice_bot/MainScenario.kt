@@ -18,7 +18,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import java.time.LocalDate
 
-class MainScenario (
+class MainScenario(
     private val requestHandler: RequestHandler
 ) : Scenario() {
     init {
@@ -178,6 +178,42 @@ class MainScenario (
                 }
             }
 
+            state("ask_password") {
+                activators {
+                    intent("ask_type")
+                }
+
+                action {
+                    val password = activator.alice?.slots?.get("password")?.value
+                    saveToSession("password", password.toString(), reactions, request)
+                    reactions.go("/main_book")
+                }
+            }
+
+            state("ask_login") {
+                activators {
+                    intent("ask_login")
+                }
+
+                action {
+                    val login = activator.alice?.slots?.get("login")?.value
+                    saveToSession("login", login.toString(), reactions, request)
+                    reactions.go("/main_book")
+                }
+            }
+
+            state("ask_number") {
+                activators {
+                    intent("ask_number")
+                }
+
+                action {
+                    val number = activator.alice?.slots?.get("number")?.value
+                    saveToSession("number", number.toString(), reactions, request)
+                    reactions.go("/main_book")
+                }
+            }
+
             state("back") {
                 activators {
                     intent("back")
@@ -191,9 +227,39 @@ class MainScenario (
                             "say_date" -> reactions.go("/main_book/say_place")
                             "say_time" -> reactions.go("/main_book/say_date")
                             "say_type" -> reactions.go("/main_book/say_time")
+                            "say_login" -> reactions.go("/main_book/say_login")
+                            "say_password" -> reactions.go("/main_book/say_password")
+                            "say_number" -> reactions.go("/main_book/say_number")
                             else -> reactions.say("Вы еще не начали бронировать помещение")
                         }
                     }
+                }
+            }
+
+            state("say_login") {
+                action {
+                    reactions.sayRandom(
+                        "Пожалуйста, уточните свой логин от ису. Это нужно для системы регистрации"
+                    )
+                    reactions.changeState("/main_book/ask_login")
+                }
+            }
+
+            state("say_login") {
+                action {
+                    reactions.sayRandom(
+                        "Пожалуйста, уточните свой пароль от ису."
+                    )
+                    reactions.changeState("/main_book/ask_password")
+                }
+            }
+
+            state("say_login") {
+                action {
+                    reactions.sayRandom(
+                        "Пожалуйста, введите свой номер телефона"
+                    )
+                    reactions.changeState("/main_book/ask_number")
                 }
             }
 
@@ -222,7 +288,8 @@ class MainScenario (
             }
             state("say_time") {
                 action {
-                    reactions.sayRandom("Пожалуйста, уточните время",
+                    reactions.sayRandom(
+                        "Пожалуйста, уточните время",
                         "Подскажите, пожалуйста, на какое время вам было бы удобно?",
                         "Хорошо, уточните интересуемое время",
                         "Хорошо, какое время вам нужно?",
@@ -370,6 +437,10 @@ class MainScenario (
             ErrorTypeResponse.NO_DATE -> mapToSaveSession["state"] = "say_date"
             ErrorTypeResponse.NO_TIME -> mapToSaveSession["state"] = "say_time"
             ErrorTypeResponse.NO_TYPE -> mapToSaveSession["state"] = "say_type"
+            ErrorTypeResponse.NO_LOGIN -> mapToSaveSession["state"] = "say_login"
+            ErrorTypeResponse.NO_PASSWORD -> mapToSaveSession["state"] = "say_password"
+            ErrorTypeResponse.NO_NUMBER ->  mapToSaveSession["state"] = "say_number"
+
             else -> mapToSaveSession["state"] = ""
         }
         saveToSession(mapToSaveSession, reactions, request)
