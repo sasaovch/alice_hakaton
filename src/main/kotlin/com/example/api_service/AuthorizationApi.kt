@@ -14,7 +14,7 @@ interface AuthorizationApi {
         @Query("scope") scope: String = "openid",
         @Query("state") state: String = "im_not_a_browser",
         @Query("code_challenge_method") code_challenge_method: String = "S256",
-        @Query("code_challenge") code_challenge: String, //todo autogeneration
+        @Query("code_challenge") code_challenge: String //todo autogeneration
     ): Call<ResponseBody>
 
     @POST
@@ -23,13 +23,13 @@ interface AuthorizationApi {
         @Url url: String,
         @Field("username") username: String,
         @Field("password") password: String,
-        @Field("credentialId") credentialId: String,
+        @Field("credentialId") credentialId: String
 
 
         ): Call<ResponseBody>
 
     @GET
     fun redirectHandler(
-        @Url url: String,
+        @Url url: String
     ): Call<ResponseBody>
 }

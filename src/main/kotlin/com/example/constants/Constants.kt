@@ -24,7 +24,7 @@ public final class Constants {
 
         public final val LomoCoworking = linkedMapOf<Int, Int>(
             Pair(1, 18851), Pair(2, 18849), Pair(3, 13167), Pair(4, 13161),
-            Pair(5, 13159), Pair(6, 13153), Pair(7, 13155), Pair(8, 13165),
+            Pair(5, 13159), Pair(6, 13153), Pair(7, 13155), Pair(8, 13165)
         )
         public final val KronvAuditorium = linkedMapOf<Int, Int>(
             Pair(2337, 29), Pair(2336, 30), Pair(2326, 36), Pair(2316, 41),
@@ -97,7 +97,7 @@ public final class Constants {
             Pair(13159, 6),
             Pair(13153, 6),
             Pair(13155, 8),
-            Pair(13165, 80),
+            Pair(13165, 80)
         )
         public final val TypeToTimeType =
             linkedMapOf<Pair<RoomType, Place>, Int>(Pair(Pair(RoomType.MEETINGROOM, Place.LOMONOSOVA), -812),

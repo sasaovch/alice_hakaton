@@ -16,6 +16,9 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.Month
+import java.util.Collections
+import java.util.stream.Collectors
+import kotlin.reflect.jvm.internal.impl.utils.CollectionsKt
 
 
 object RequestHandler {
@@ -74,14 +77,14 @@ object RequestHandler {
             val listOfId = infoHandler.getFreeRooms(room.place!!, dateList, dateString, room.type)
             return listOfId.stream().map { it -> Room(room.place, room.time, room.day, room.month, room.hour, room.minute, idToNum(it), room.type, 0) }
                 .limit(3)
-                .toList()
+                .collect(Collectors.toList())
         } else {
             val listOfId =
                 infoHandler.getFreeRoomsByPeopleNum(room.place!!, dateList, dateString, room.type, room.numberMem)
             return listOfId.stream()
                 .map { it -> Room(room.place, room.time, room.day, room.month,room.hour, room.minute, idToNum(it), room.type, room.duration) }
                 .limit(3)
-                .toList()
+                .collect(Collectors.toList())
         }
 //        if (room.numberMem == 0) {
 //            return listOf(

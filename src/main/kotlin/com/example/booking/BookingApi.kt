@@ -22,7 +22,7 @@ interface BookingApi {
         @Field("p_arg_names") p_arg_names : String = "P4_AUD_SEL",
         @Field("p_arg_names") blank : String = "P4_R_R_ID",
         @Field("p_arg_values") selectedId : String,
-        @Field("p_arg_values") p_arg_values : String = "",
+        @Field("p_arg_values") p_arg_values : String = ""
 
         ): Call<ResponseBody>
     @POST("/pls/apex/wwv_flow.show")
@@ -35,7 +35,7 @@ interface BookingApi {
         @Field("p_debug") p_debug : String = "",
         @Field("p_widget_action") p_widget_action : String = "reset",
         @Field("x01") x01 : String = "4881620431290747483",
-        @Field("p_widget_name") p_widget_name : String = "classic_report",
+        @Field("p_widget_name") p_widget_name : String = "classic_report"
     ): Call<ResponseBody>
     //dont work properly and still encode & and =, so custom interceptor is needed
     @POST("/pls/apex/wwv_flow.accept")
@@ -46,6 +46,6 @@ interface BookingApi {
 
     @GET
     fun redirectHandler(
-        @Url url: String,
+        @Url url: String
     ): Call<ResponseBody>
 }

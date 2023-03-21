@@ -19,20 +19,20 @@ interface RoomInfoApi {
         @Field("p_arg_names") p_arg_names2: String,
         @Field("p_arg_values") p_arg_value2: String,
         @Field("p_arg_names") p_arg_names3: String,
-        @Field("p_arg_values") p_arg_value3: String,
+        @Field("p_arg_values") p_arg_value3: String
 
         ): Call<ResponseBody>
 
     @GET("/pls/apex/f?p=2431:4:1019:/")
     fun checkForRedirect(
-        @Header("Cookie") cookie: String,
+        @Header("Cookie") cookie: String
 
 
         ): Call<ResponseBody>
 
     @GET("/pls/apex/f?p=2431:4:1234:/")
     fun getHtmlWithPlugin(
-        @Header("Cookie") cookie: String,
+        @Header("Cookie") cookie: String
     ): Call<ResponseBody>
 
 

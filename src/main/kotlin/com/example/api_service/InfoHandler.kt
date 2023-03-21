@@ -124,7 +124,7 @@ class InfoHandler(cookies : CookieHandler) {
             .build()
         val request = rf.create(RoomInfoApi::class.java)
         val call = request.checkForRedirect(
-            isuApCookie,
+            isuApCookie
         )
         val response = call.execute()
         if (response.code() == 302) {

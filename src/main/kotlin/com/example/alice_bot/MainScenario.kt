@@ -57,9 +57,7 @@ class MainScenario(
                                 "в ${convertTimeToHHMMFormat(booked[0].hour!!, booked[0].minute!!)} на ${booked[0].place!!.getRepositionalCase()}")
                     } else {
                         reactions.say("У вас есть ${booked.size} забронированных помещений\n")
-                        booked.sortedWith(Comparator { o1: Room, o2: Room ->
-                            o1.minute!!.compareTo(o2.minute!!)
-                        }).forEach {
+                        booked.sortedWith(RoomComparator()).forEach {
                             reactions.say("${it.type.getNominativeCaseWithCapL()} на ${it.place!!.getRepositionalCase()} на ${it.day}.${it.month?.value} в ${convertTimeToHHMMFormat(it.hour!!, it.minute!!)}")
                         }
                     }
@@ -151,7 +149,7 @@ class MainScenario(
                         saveToSession(
                             mapOf(
                                 "month" to month.toString(),
-                                "day" to day.toString(),
+                                "day" to day.toString()
                             ),
                             reactions,
                             request
@@ -179,7 +177,7 @@ class MainScenario(
                         saveToSession(
                             mapOf(
                                 "hour" to responseForToday.roomList[0].hour.toString(),
-                                "minute" to responseForToday.roomList[0].minute.toString(),
+                                "minute" to responseForToday.roomList[0].minute.toString()
                                 ),
                                 reactions,
                             request
@@ -452,7 +450,7 @@ class MainScenario(
                         "Пожалуйста, уточните дату",
                         "Уточните дату, которая вас интересует.",
                         "Подскажите, пожалуйста, дату брони.",
-                        "Какая дата вам нужна?",
+                        "Какая дата вам нужна?"
                     )
                     reactions.buttons("Назад")
                     reactions.changeState("/main_book/ask_date")
@@ -465,7 +463,7 @@ class MainScenario(
                         "Подскажите, пожалуйста, на какое время вам было бы удобно?",
                         "Уточните интересуемое время.",
                         "Какое время вам нужно?",
-                        "На какое время вы хотите забронировать?",
+                        "На какое время вы хотите забронировать?"
                     )
                     reactions.buttons("Назад")
                     reactions.changeState("/main_book/ask_time")
@@ -499,7 +497,7 @@ class MainScenario(
                                 "Подскажите, пожалуйста, на какое время вам было бы удобно?",
                                 "Хорошо, уточните интересуемое время",
                                 "Хорошо, какое время вам нужно?",
-                                "На какое время вы хотите забронировать?",
+                                "На какое время вы хотите забронировать?"
                             )
                         }
                     }
@@ -837,7 +835,7 @@ class MainScenario(
             reactions.go("say_login")
             return User("", "", "")
         } else {
-            reactions.say("Идет авторизация. Пожалуйста, подождите")
+            reactions.say("Подождите. Идет авторизация...")
 //            return User(loginR.content, passworR.content, phone.content)
 //            reactions
             return requestHandler.auth(User(loginR.content, passworR.content, phone.content))

@@ -7,10 +7,10 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="kotlin" />
-        <module name="alice-hack" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="alice-hack" target="16" />
       <module name="aliceskill" target="1.8" />
     </bytecodeTargetLevel>
   </component>
