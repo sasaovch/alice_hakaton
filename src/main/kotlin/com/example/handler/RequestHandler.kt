@@ -3,6 +3,7 @@ package com.example.handler
 import InfoHandler
 import booking.BookingHandler
 import com.example.api_service.AuthorizationHandler
+import com.example.constants.Constants.Companion.idToNum
 import com.example.cookie.CookieHandler
 import com.example.models.*
 import com.example.util.TimeParser
@@ -70,29 +71,41 @@ object RequestHandler {
         val dateString = convertDateToDDMMYYYYFormat(room.day!!, room.month!!)
         println(dateString)
         if (room.numberMem == 0) {
+            val listOfId = infoHandler.getFreeRooms(room.place!!, dateList, dateString, room.type)
+            return listOfId.stream().map { it -> Room(room.place, room.time, room.day, room.month, room.hour, room.minute, idToNum(it), room.type, 0) }
+                .limit(3)
+                .toList()
+        } else {
+            val listOfId =
+                infoHandler.getFreeRoomsByPeopleNum(room.place!!, dateList, dateString, room.type, room.numberMem)
+            return listOfId.stream()
+                .map { it -> Room(room.place, room.time, room.day, room.month,room.hour, room.minute, idToNum(it), room.type, room.duration) }
+                .limit(3)
+                .toList()
+        }
+//        if (room.numberMem == 0) {
 //            return listOf(
 //                Room(room.place, room.time, room.day, room.month, room.hour, room.minute, 1221, room.type, 0),
 //                Room(room.place, room.time, room.day, room.month, room.hour, room.minute, 1312, room.type, 0),
 //                Room(room.place, room.time, room.day, room.month, room.hour, room.minute, 1432, room.type, 0)
 //            )
-            val listOfId = infoHandler.getFreeRooms(room.place!!, dateList, dateString, room.type)
-            return listOfId.stream().map { it -> Room(room.place, room.time, room.day, room.month, room.hour, room.minute, it, room.type, 0) }
-                .limit(3)
-                .toList()
-        } else {
+//            val listOfId = infoHandler.getFreeRooms(room.place!!, dateList, dateString, room.type)
+//            return listOfId.stream().map { it -> Room(room.place, room.time, room.day, room.month, room.hour, room.minute, it, room.type, 0) }
+//                .limit(3)
+//                .toList()
+//        } else {
 //            return listOf(
 //                Room(room.place, room.time, room.day, room.month, room.hour, room.minute, 1212, room.type, 0, DayOfWeek.NONE, room.numberMem),
 //                Room(room.place, room.time, room.day, room.month, room.hour, room.minute, 1225, room.type, 0, DayOfWeek.NONE, room.numberMem),
 //                Room(room.place, room.time, room.day, room.month, room.hour, room.minute, 1554, room.type, 0, DayOfWeek.NONE, room.numberMem),
 //            )
-            val listOfId =
-                infoHandler.getFreeRoomsByPeopleNum(room.place!!, dateList, dateString, room.type, room.numberMem)
-            return listOfId.stream()
-                .map { it -> Room(room.place, room.time, room.day, room.month, room.hour, room.minute, it, room.type, room.duration) }
-                .limit(3)
-                .toList()
+//            val listOfId =
+//                infoHandler.getFreeRoomsByPeopleNum(room.place!!, dateList, dateString, room.type, room.numberMem)
+//            return listOfId.stream()
+//                .map { it -> Room(room.place, room.time, room.day, room.month, room.hour, room.minute, it, room.type, room.duration) }
+//                .limit(3)
+//                .toList()
         }
-    }
 
     fun bookRoom(room: Room, user: User): Boolean {
 

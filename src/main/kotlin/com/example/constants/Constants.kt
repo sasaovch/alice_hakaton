@@ -160,6 +160,30 @@ public final class Constants {
             }
             return -1
         }
+        fun idToNum(id: Int): Int {
+            for (key in LomoCoworking.keys) {
+                if (LomoCoworking[key] == id) {
+                    return key
+                }
+            }
+            for (key in LomoAud.keys) {
+                if (LomoAud[key] == id) {
+                    return key
+                }
+            }
+            for (key in KronvAuditorium.keys) {
+                if (KronvAuditorium[key] == id) {
+                    return key
+                }
+            }
+            for (key in KronvCoworkingAud.keys) {
+                if (KronvCoworkingAud[key] == id) {
+                    return key
+                }
+            }
+            return -1
+
+        }
 
 
     }
