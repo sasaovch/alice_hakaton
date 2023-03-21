@@ -84,7 +84,7 @@ class RequestHandler {
             }
         } else {
             if (timeToBook.hour != null) {
-                if (timeToBook.hourIsRelative) {
+                if (timeToBook.hour_is_relative) {
                     room.hour = LocalTime.now().plusHours(timeToBook.hour).hour
                 } else {
                     room.hour = timeToBook.hour.toInt()
@@ -94,7 +94,7 @@ class RequestHandler {
                 room.hour = hour.toInt()
             }
             if (timeToBook.minute != null) {
-                if (timeToBook.minuteIsRelative) {
+                if (timeToBook.minute_is_relative) {
                     room.minute = LocalTime.now().plusMinutes(timeToBook.minute).minute
                     room.hour = LocalTime.now().plusMinutes(timeToBook.minute).hour
                 } else {
@@ -109,7 +109,7 @@ class RequestHandler {
                 room.month = Month.valueOf(month)
             }
             if (timeToBook.day != null) {
-                if (timeToBook.dayIsRelative) {
+                if (timeToBook.day_is_relative) {
                     room.day = LocalDate.now().plusDays(timeToBook.day).dayOfMonth
                     room.month = LocalDate.now().plusDays(timeToBook.day).month
                 } else {
@@ -151,7 +151,7 @@ class RequestHandler {
         return time.first in 8..21 && time.second in 0..59
     }
 //FIXME: check
-    private fun isRightDateToBook(month: Month, day: Int): Boolean {
+    fun isRightDateToBook(month: Month, day: Int): Boolean {
         val dateToBook = LocalDate.of(2023, month, day)
         return dateToBook.isAfter(LocalDate.now().minusDays(1)) && dateToBook.isBefore(LocalDate.now().plusDays(8))
     }

@@ -106,7 +106,8 @@ class MainScenario(
                     println(en.toString())
                     val tim = Gson().fromJson(en.toString(), TimeToBook::class.java)
                     val responseForToday = requestHandler.getTimeToBook(en.toString())
-                    if (responseForToday.error != ErrorTypeResponse.NO_DATE) {
+                    if (responseForToday.error != ErrorTypeResponse.NO_DATE && requestHandler.isRightDateToBook(responseForToday.roomList[0].month!!, responseForToday.roomList[0].day!!)) {
+                        requestHandler.isRightDateToBook(responseForToday.roomList[0].month!!, responseForToday.roomList[0].day!!)
                         val month = responseForToday.roomList[0].month
                         val day = responseForToday.roomList[0].day
                         saveToSession(
@@ -118,7 +119,7 @@ class MainScenario(
                             request
                         )
                     } else {
-                        reactions.say("Неправильная дата. Мы можем забронировать только на будущую дату не дальше семи дней. Повторите, пожалуйста, на какую дату забронировать")
+                        reactions.say("Неправильная дата. Мы можем забронировать только на будущую дату не дальше семи дней.")
                             saveToSession("state", "say_date", reactions, request)
                     }
                     reactions.go("/main_book")
@@ -144,7 +145,7 @@ class MainScenario(
                             request
                         )
                     } else {
-                        reactions.say("Вы выбрали не правильное время. Можно бронировать с 8 утра до 22 вечера")
+                        reactions.say("Вы выбрали не правильное время. Можно бронировать с 8 утра до 22 вечера.")
                         saveToSession("state", "say_time", reactions, request)
                     }
                     reactions.go("/main_book")
@@ -164,7 +165,7 @@ class MainScenario(
                     when (response.error) {
                         ErrorTypeResponse.SUCCESS -> saveToSession("time", convertTimeToRussion(response.roomList[0].time!!), reactions, request)
                         else -> {
-                            reactions.say("Вы выбрали не правильное время. Можно бронировать с 8 утра до 22 вечера")
+                            reactions.say("Вы выбрали не правильное время. Можно бронировать с 8 утра до 22 вечера.")
                             saveToSession("state", "say_time", reactions, request)
                         }
                     }
@@ -184,7 +185,7 @@ class MainScenario(
                     when (response.error) {
                         ErrorTypeResponse.SUCCESS -> saveToSession("type", response.roomList[0].type.toString(), reactions, request)
                         else -> {
-                            reactions.say("Извините, на данный момент мы можем забронировать аудиторию или переговорку")
+                            reactions.say("Извините, на данный момент мы можем забронировать аудиторию или переговорку.")
                             saveToSession("state", "say_type", reactions, request)
                         }
                     }
@@ -366,9 +367,9 @@ class MainScenario(
             state("say_date") {
                 action {
                     reactions.sayRandom("Пожалуйста, уточните дату",
-                        "Хорошо, уточните дату, которая вас интересует",
-                        "Подскажите, пожалуйста, дату брони",
-                        "Хорошо, какая дата вам нужна?",
+                        "Уточните дату, которая вас интересует.",
+                        "Подскажите, пожалуйста, дату брони.",
+                        "Какая дата вам нужна?",
                     )
                     reactions.buttons("Назад")
                     reactions.changeState("/main_book/ask_date")
@@ -377,10 +378,10 @@ class MainScenario(
             state("say_time") {
                 action {
                     reactions.sayRandom(
-                        "Пожалуйста, уточните время",
+                        "Пожалуйста, уточните время.",
                         "Подскажите, пожалуйста, на какое время вам было бы удобно?",
-                        "Хорошо, уточните интересуемое время",
-                        "Хорошо, какое время вам нужно?",
+                        "Уточните интересуемое время.",
+                        "Какое время вам нужно?",
                         "На какое время вы хотите забронировать?",
                     )
                     reactions.buttons("Назад")
@@ -422,6 +423,7 @@ class MainScenario(
                     reactions.changeState("/main_book")
                 }
             }
+
             state("say_type") {
                 action {
                     reactions.sayRandom("Пожалуйста, уточните вам нужна аудитория или переговорка",
@@ -565,7 +567,8 @@ class MainScenario(
         }
 
 //        val todayReq = requestHandler.getTodayFromRequest(roomRequest.today)
-        if (timeToBook.error != ErrorTypeResponse.NO_DATE && timeToBook.error != ErrorTypeResponse.EMPTY) {
+        if (timeToBook.error != ErrorTypeResponse.NO_DATE && timeToBook.error != ErrorTypeResponse.EMPTY
+            && requestHandler.isRightDateToBook(timeToBook.roomList[0].month!!, timeToBook.roomList[0].day!!)) {
 //            mapToSaveSession["today"] = todayReq.roomList[0].today.toString()
             room.month = timeToBook.roomList[0].month
             room.day = timeToBook.roomList[0].day

@@ -5,8 +5,8 @@ data class TimeToBook(
     val day: Long?,
     val hour: Long?,
     val minute: Long?,
-    val monthIsRelative: Boolean = false,
-    val dayIsRelative: Boolean = false,
-    val hourIsRelative: Boolean = false,
-    val minuteIsRelative: Boolean = false
+    val month_is_relative: Boolean = false,
+    val day_is_relative: Boolean = false,
+    val hour_is_relative: Boolean = false,
+    val minute_is_relative: Boolean = false
 )
