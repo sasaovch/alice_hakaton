@@ -6,7 +6,8 @@ data class Room(
     var time: Pair<Int, Int>? = null,
     var day: Int? = null,
     var month: Month? = null,
-    var roomId: Int? = 0,
+    var roomId: Int = 0,
     var type: RoomType = RoomType.NONE,
-    var today: DayOfWeek = DayOfWeek.NONE
+    var today: DayOfWeek = DayOfWeek.NONE,
+    var numberMem: Int = 0
 )
