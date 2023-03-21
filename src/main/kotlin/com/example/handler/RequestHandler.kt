@@ -28,6 +28,10 @@ class RequestHandler {
         return listOfId.stream().map { it -> Room(room.place, room.time, room.day, room.month, it, room.type) }.limit(3).toList()
     }
 
+    fun authUser(login: String, password: String, phone: String): Boolean {
+    return true
+    }
+
     fun bookRoom(room: Room): List<Room> {
         val cookies = CookieHandler();
         val au = AuthorizationHandler(cookies)

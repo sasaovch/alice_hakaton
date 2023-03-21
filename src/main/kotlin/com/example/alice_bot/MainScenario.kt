@@ -211,7 +211,8 @@ class MainScenario(
                     val phone = activator.alice?.slots?.get("phone")?.value
                     println("Phone ${phone}")
                     saveToApplication("phone", removeQuotations(phone.toString()), reactions, request)
-                    reactions.go("/main_book")
+                    authUser(reactions, request)
+//                    reactions.go("/main_book")
                 }
             }
 
@@ -495,6 +496,9 @@ class MainScenario(
         val listRooms = Gson().fromJson(strList.substring(1, strList.length - 1).replace("\\", ""), Array<Room>::class.java).asList()
         println("$listRooms that")
         return listRooms
+    }
+    private fun authUser(reactions: Reactions, request: BotRequest): Boolean {
+    return true
     }
 
     private fun goToPreviousState(reactions: Reactions, state: String) {

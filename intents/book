@@ -47,3 +47,56 @@ $Today:
 $NumberMember:
     %lemma
     $YANDEX.NUMBER (человек | мест)
+
+
+
+
+slots:
+    day:
+        type: YANDEX.NUMBER
+        source: $DayNumber
+    month:
+        type: BookTimeMonth
+        source: $Month
+    time:
+        source: $Time
+    room:
+        type: PlaceType
+        source: $Type
+    place:
+        type: ItmoPlace
+        source: $Where
+    today:
+        type: TodayAndTomorrow
+        source: $TodayAndTomorrow
+    number:
+        type: YANDEX.NUMBER
+        source: $NumberMember
+
+root:
+    %lemma
+    $BookWord [((в | на)? [$DayNumber $Month])? ($Type)? ((в | на)? $Time)? ((в | на)? $Where)? ((на)? $Today)? ((на)? $NumberMember)?]
+
+$BookWord:
+    %lemma
+    забронируй | забронь | бронь | подать заявку на бронь | забронируй пожалуйста | забронировать
+$DayNumber:
+    %lemma
+    $YANDEX.NUMBER
+$Month:
+    $BookTimeMonth
+$Time:
+    %lemma
+    $YANDEX.DATETIME
+$Where:
+    %lemma
+    $ItmoPlace
+$Type:
+    %lemma
+    $PlaceType
+$Today:
+    %lemma
+    $TodayAndTomorrow
+$NumberMember:
+    %lemma
+    $YANDEX.NUMBER (человек | мест)
