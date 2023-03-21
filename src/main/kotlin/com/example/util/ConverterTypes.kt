@@ -28,7 +28,18 @@ fun convertTimeToHHMMFormat(time: Pair<Int, Int>): String {
         res = time.first.toString() + ":" + time.second.toString()
     }
     return res
+}
 
+fun convertTimeToHHMMFormat(hour: Int, minute: Int): String {
+    return if (minute < 10) {
+        "$hour:0$minute"
+    } else if (minute < 30) {
+        "$hour:$minute"
+    } else if (minute < 40) {
+        "$hour:$minute"
+    } else {
+        "$hour:$minute"
+    }
 }
 
 fun convertDateToDDMMYYYYFormat(day: Int, month: Month): String {

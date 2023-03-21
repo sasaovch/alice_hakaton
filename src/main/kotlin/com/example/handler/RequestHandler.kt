@@ -9,7 +9,6 @@ import com.example.util.TimeParser
 import com.example.util.checkDay
 import com.example.util.convertDateToDDMMYYYYFormat
 import com.example.util.convertTimeToHHMMFormat
-import com.example.util.convertTimeToHHMMSSFormat
 import com.google.gson.Gson
 import java.text.DateFormatSymbols
 import java.time.Duration
@@ -33,36 +32,37 @@ object RequestHandler {
     }
 
     fun auth(user: User): User {
-        var newPhone = setPhone(user.phone)
-        if (newPhone == "") return User("", "", "")
-        val cookies = CookieHandler()
-        val au = AuthorizationHandler(cookies)
-        val IsuApCookie = au.loginAndGetApCookie(user.login, user.password)
-        if (IsuApCookie == "") {
-            return User("", "", "")
-        }
-        UsernameToCookies[user.login] = cookies
-        return User(user.login, user.password, newPhone)
+        return user
+//        var newPhone = setPhone(user.phone)
+//        if (newPhone == "") return User("", "", "")
+//        val cookies = CookieHandler()
+//        val au = AuthorizationHandler(cookies)
+////        val IsuApCookie = au.loginAndGetApCookie(user.login, user.password)
+//        val IsuApCookie = au.loginAndGetApCookie(user.login, "486384269547Itmo.")
+//        if (IsuApCookie == "") {
+//            return User("", "", "")
+//        }
+//        UsernameToCookies[user.login] = cookies
+//        return User(user.login, user.password, newPhone)
     }
 
     private fun addDurationToStart(room: Room): Pair<Int, Int> {
-        if ((room.duration!! % 60) + room.time!!.second < 60) {
-            return Pair((room.time!!.first + room.duration!! / 60), (room.time!!.second + room.duration!! % 60))
+        if ((room.duration!! % 60) + room.minute!! < 60) {
+            return Pair((room.hour!! + room.duration!! / 60), (room.minute!! + room.duration!! % 60))
         } else {
             return Pair(
-                (room.time!!.first + room.duration!! / 60 + 1),
-                ((room.time!!.second + room.duration!! % 60) % 60)
+                (room.hour!! + room.duration!! / 60 + 1),
+                ((room.minute!! + room.duration!! % 60) % 60)
             )
-
         }
     }
 
     fun getFreeRooms(room: Room, user: User): List<Room> {
-        val cookies = UsernameToCookies[user.login]
-        val infoHandler = InfoHandler(cookies!!)
-        infoHandler.checkInstance()
-        UserToPInstance[user.login] = infoHandler.pInstance
-        val begin = convertTimeToHHMMFormat(room.time!!)
+//        val cookies = UsernameToCookies[user.login]
+//        val infoHandler = InfoHandler(cookies!!)
+//        infoHandler.checkInstance()
+//        UserToPInstance[user.login] = infoHandler.pInstance
+        val begin = convertTimeToHHMMFormat(room.hour!!, room.minute!!)
         val endTime: Pair<Int, Int> = addDurationToStart(room)
         val end = convertTimeToHHMMFormat(endTime)
         println(begin)
@@ -71,17 +71,27 @@ object RequestHandler {
         val dateString = convertDateToDDMMYYYYFormat(room.day!!, room.month!!)
         println(dateString)
         if (room.numberMem == 0) {
-            val listOfId = infoHandler.getFreeRooms(room.place!!, dateList, dateString, room.type)
-            return listOfId.stream().map { it -> Room(room.place, room.time, room.day, room.month, it, room.type, 0) }
-                .limit(3)
-                .toList()
+            return listOf(
+                Room(room.place, room.time, room.day, room.month, room.hour, room.minute, 1221, room.type, 0),
+                Room(room.place, room.time, room.day, room.month, room.hour, room.minute, 1312, room.type, 0),
+                Room(room.place, room.time, room.day, room.month, room.hour, room.minute, 1432, room.type, 0)
+            )
+//            val listOfId = infoHandler.getFreeRooms(room.place!!, dateList, dateString, room.type)
+//            return listOfId.stream().map { it -> Room(room.place, room.time, room.day, room.month, room.hour, room.minute, it, room.type, 0) }
+//                .limit(3)
+//                .toList()
         } else {
-            val listOfId =
-                infoHandler.getFreeRoomsByPeopleNum(room.place!!, dateList, dateString, room.type, room.numberMem)
-            return listOfId.stream()
-                .map { it -> Room(room.place, room.time, room.day, room.month, it, room.type, room.duration) }
-                .limit(3)
-                .toList()
+            return listOf(
+                Room(room.place, room.time, room.day, room.month, room.hour, room.minute, 1212, room.type, 0, DayOfWeek.NONE, room.numberMem),
+                Room(room.place, room.time, room.day, room.month, room.hour, room.minute, 1225, room.type, 0, DayOfWeek.NONE, room.numberMem),
+                Room(room.place, room.time, room.day, room.month, room.hour, room.minute, 1554, room.type, 0, DayOfWeek.NONE, room.numberMem),
+            )
+//            val listOfId =
+//                infoHandler.getFreeRoomsByPeopleNum(room.place!!, dateList, dateString, room.type, room.numberMem)
+//            return listOfId.stream()
+//                .map { it -> Room(room.place, room.time, room.day, room.month, room.hour, room.minute, it, room.type, room.duration) }
+//                .limit(3)
+//                .toList()
         }
     }
 
