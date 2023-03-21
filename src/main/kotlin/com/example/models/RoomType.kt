@@ -21,6 +21,14 @@ enum class RoomType {
         }
     }
 
+    fun getNominativeCaseWithCapL(): String {
+        when (this) {
+            RoomType.AUDIENCE -> return "Аудитория"
+            RoomType.MEETINGROOM -> return "Переговорка"
+            else -> return "Помещение"
+        }
+    }
+
     fun getRepositionalCase(): String {
         when (this) {
             RoomType.AUDIENCE -> return "аудитории"

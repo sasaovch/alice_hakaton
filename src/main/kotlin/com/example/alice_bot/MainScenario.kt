@@ -2,11 +2,10 @@ package com.example.alice_bot
 
 import com.example.handler.RequestHandler
 import com.example.models.*
+import com.example.util.convertTimeToHHMMFormat
 import com.example.util.convertTimeToRussion
-import com.example.util.convertTimeToString
 import com.example.util.removeQuotations
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.justai.jaicf.api.BotRequest
 import com.justai.jaicf.channel.yandexalice.activator.alice
 import com.justai.jaicf.channel.yandexalice.alice
@@ -41,20 +40,29 @@ class MainScenario(
                 )
                 reactions.buttons("Помощь")
                 reactions.buttons("Что ты умеешь")
-                reactions.buttons("Какие аудитории у меня уже забронированы?")
+                reactions.buttons("Какие аудитории забронированы?")
             }
         }
 
         state("info") {
             activators {
-                regex("Какие аудитории у меня уже забронированы?")
+                regex("Какие аудитории забронированы?")
             }
 
             action {
                 val booked = getRoomsFromApplicatoinState(request)
-                if (booked != null) {
-                    reactions.say("У вас есть забронированная аудитория на ${booked.place?.names?.firstOrNull()} " +
-                            "в ${booked.hour}:${booked.minute} на дату: ${booked.day}.${booked.month?.value}")
+                if (booked.isNotEmpty()) {
+                    if (booked.size == 1) {
+                        reactions.say("У вас забронирована ${booked[0].type.getNominativeCase()} на ${booked[0].place!!.getRepositionalCase()} " +
+                                "в ${convertTimeToHHMMFormat(booked[0].hour!!, booked[0].minute!!)} на ${booked[0].place!!.getRepositionalCase()}")
+                    } else {
+                        reactions.say("У вас есть ${booked.size} забронированных помещений\n")
+                        booked.sortedWith(Comparator { o1: Room, o2: Room ->
+                            o1.minute!!.compareTo(o2.minute!!)
+                        }).forEach {
+                            reactions.say("${it.type.getNominativeCaseWithCapL()} на ${it.place!!.getRepositionalCase()} на ${it.day}.${it.month?.value} в ${convertTimeToHHMMFormat(it.hour!!, it.minute!!)}")
+                        }
+                    }
                 }
             }
         }
@@ -66,12 +74,14 @@ class MainScenario(
             }
 
             action {
-//                reactions.sayRandom(
-//                    "Вы можете сказать: Забронируй аудиторию на Ломоносова на 8 марта на 15 00, или Забронируй переговорку на Кронверском проспекте на 10 февраля на 20 00, или просто слово забронируй и мы спросим вас о всех параметрах. Если вы указали неправильный параметр, можете просто повторить его или сказать слово назад"
-//                )
+                reactions.sayRandom(
+                    "Вы можете сказать: Забронируй аудиторию на Ломоносова на 8 марта на 15 00, или Забронируй переговорку на Кронверском проспекте на 10 февраля на 20 00, или просто слово забронируй и мы спросим вас о всех параметрах. Если вы указали неправильный параметр, можете просто повторить его или сказать слово назад"
+                )
+                println(request.input)
                 reactions.buttons("Помощь")
                 reactions.buttons("Что ты умеешь")
-                reactions.alice?.say("<speaker audio=\"alice-music-drum-loop-1.opus\"> У вас получилось!")
+                reactions.buttons("Какие аудитории забронированы?")
+//                reactions.alice?.say("<speaker audio=\"alice-music-drum-loop-1.opus\"> У вас получилось!")
             }
         }
 
@@ -87,6 +97,7 @@ class MainScenario(
                 )
                 reactions.buttons("Помощь")
                 reactions.buttons("Что ты умеешь")
+                reactions.buttons("Какие аудитории забронированы?")
             }
         }
 
@@ -268,9 +279,15 @@ class MainScenario(
                 }
 
                 action {
-                    val password = activator.alice?.slots?.get("password")?.value
-                    println("Paswwor ${removeQuotations(password.toString())}")
-                    saveToApplication("password", removeQuotations(password.toString()).replace(" ", ""), reactions, request)
+//                    val password = activator.alice?.slots?.get("password")?.value
+                    val password = request.alice?.request?.originalUtterance?.split(" ")
+                    if (password == null || password.size != 2) {
+                        saveToSession(emptyMap(), reactions, request)
+                        reactions.go("/main_book/say_password")
+                    }
+//                    println("Paswwor ${removeQuotations(password.toString())}")
+//                    println(password!![1])
+                    saveToApplication("password", password!![1], reactions, request)
                     saveToSession(emptyMap(), reactions, request)
                     reactions.go("/main_book/say_phone")
                 }
@@ -324,7 +341,11 @@ class MainScenario(
 
             state("congratulations") {
                 action {
-                    reactions.say("Аудиторию забронирована")
+                    reactions.say("Аудиторию забронирована. Вы можете посмотреть список всех забронированных аудиторий.")
+                    reactions.buttons("Помощь")
+                    reactions.buttons("Что ты умеешь")
+                    reactions.buttons("Какие аудитории забронированы?")
+                    reactions.changeState("/start")
                 }
             }
 
@@ -816,7 +837,7 @@ class MainScenario(
             reactions.go("say_login")
             return User("", "", "")
         } else {
-//            reactions.say("Идет авторизация. Пожалуйста, подождите")
+            reactions.say("Идет авторизация. Пожалуйста, подождите")
 //            return User(loginR.content, passworR.content, phone.content)
 //            reactions
             return requestHandler.auth(User(loginR.content, passworR.content, phone.content))
@@ -825,18 +846,16 @@ class MainScenario(
 
     private fun getRoomsFromApplicatoinState(
         request: BotRequest
-    ): Room? {
-        val roomsJson = request.alice?.state?.user?.get("room")
-
-        if (roomsJson == null) {
-            return null
-        }
+    ): List<Room> {
+        val roomsJson = request.alice?.state?.user?.get("room") ?: return emptyList()
 
         val room =
             request.alice?.state?.user?.get("room").toString().replace("\\", "")
-        val roomToBook = Gson().fromJson(room, Room::class.java)
-
-        return roomToBook
+try{
+    return Gson().fromJson(room.substring(1, room.length - 1), Array<Room>::class.java).toList()
+} catch (e: Exception) {
+    return listOf(Gson().fromJson(room.substring(1, room.length - 1), Room::class.java))
+}
     }
 
     private fun bookRoom(
@@ -965,7 +984,10 @@ class MainScenario(
         reactions: Reactions,
         request: BotRequest
     ) {
-        val strJson = Gson().toJson(room)
+        val booked = getRoomsFromApplicatoinState(request)
+        val mutLi = booked.toMutableList()
+        mutLi.add(room)
+        val strJson = Gson().toJson(mutLi)
         reactions.alice?.updateUserState("room", JsonPrimitive(strJson))
     }
 }
