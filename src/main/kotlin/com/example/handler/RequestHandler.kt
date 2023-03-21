@@ -8,9 +8,11 @@ import com.example.models.*
 import com.example.util.checkDay
 import com.example.util.convertDateToDDMMYYYYFormat
 import com.example.util.convertTimeToHHMMSSFormat
+import com.google.gson.Gson
 import java.text.DateFormatSymbols
 import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.Month
 import java.util.Collections
 import java.util.Date
@@ -20,12 +22,13 @@ import java.util.Date
 class RequestHandler {
     private val infoHandler : InfoHandler = InfoHandler;
     fun getFreeRooms(room: Room): List<Room> {
+        //FIXME: change time Pair to minute and hour
         val timeString = convertTimeToHHMMSSFormat(room.time!!)
         println(timeString)
         val dateString = convertDateToDDMMYYYYFormat(room.day!!, room.month!!)
         println(dateString)
         val listOfId = infoHandler.getFreeRooms(room.place!!, timeString, dateString, room.type)
-        return listOfId.stream().map { it -> Room(room.place, room.time, room.day, room.month, it, room.type) }.limit(3).toList()
+        return listOfId.stream().map { it -> Room(place = room.place, time = room.time, day = room.day, month= room.month, roomId = it, type = room.type) }.limit(3).toList()
     }
 
     fun authUser(login: String, password: String, phone: String): Boolean {
@@ -60,6 +63,72 @@ class RequestHandler {
         } else {
             null
         }
+    }
+
+    fun getTimeToBook(time: String, hour: String = "null", minute: String = "null", month: String = "null", day: String = "null"): RoomResponce {
+        val room = Room()
+        var error = ErrorTypeResponse.SUCCESS
+        val timeToBook = Gson().fromJson(time, TimeToBook::class.java)
+        if (timeToBook == null) {
+            if (hour != "null") {
+                room.hour = hour.toInt()
+            }
+            if (minute != "null") {
+                room.minute = minute.toInt()
+            }
+            if (month != "null") {
+                room.month = Month.valueOf(month)
+            }
+            if (day != "null") {
+                room.day = day.toInt()
+            }
+        } else {
+            if (timeToBook.hour != null) {
+                if (timeToBook.hourIsRelative) {
+                    room.hour = LocalTime.now().plusHours(timeToBook.hour).hour
+                } else {
+                    room.hour = timeToBook.hour.toInt()
+                }
+                room.minute = 0
+            } else if (hour != "null") {
+                room.hour = hour.toInt()
+            }
+            if (timeToBook.minute != null) {
+                if (timeToBook.minuteIsRelative) {
+                    room.minute = LocalTime.now().plusMinutes(timeToBook.minute).minute
+                    room.hour = LocalTime.now().plusMinutes(timeToBook.minute).hour
+                } else {
+                    room.minute = timeToBook.minute.toInt()
+                }
+            } else if (minute != "null") {
+                room.minute = minute.toInt()
+            }
+            if (timeToBook.month != null) {
+                room.month = Month.of(timeToBook.month)
+            } else if (month != "null") {
+                room.month = Month.valueOf(month)
+            }
+            if (timeToBook.day != null) {
+                if (timeToBook.dayIsRelative) {
+                    room.day = LocalDate.now().plusDays(timeToBook.day).dayOfMonth
+                    room.month = LocalDate.now().plusDays(timeToBook.day).month
+                } else {
+                    room.day = timeToBook.day.toInt()
+                }
+            } else if (day != "null") {
+                room.day = day.toInt()
+            }
+        }
+        if (room.minute == null || room.hour == null) {
+            error = ErrorTypeResponse.NO_TIME
+        }
+        if (room.day == null || room.month == null) {
+            error = ErrorTypeResponse.NO_DATE
+        }
+        if ((room.minute == null || room.hour == null) && (room.day == null || room.month == null)) {
+            error = ErrorTypeResponse.EMPTY
+        }
+        return RoomResponce(listOf(room), error)
     }
 
     fun getPlaceFromRequest(place: String): RoomResponce {
