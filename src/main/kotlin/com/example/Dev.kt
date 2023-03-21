@@ -28,7 +28,7 @@ fun main() {
 
 fun main() {
     val rq : RequestHandler = RequestHandler()
-    rq.auth("336439", "Jivoglot=))0", "89532607422")
+    rq.auth("", "", "")
     val ans1 = rq.getFreeRooms(Room(Place.KRONVERSKY, Pair(10, 0), 30, Month.MARCH, 1311, RoomType.MEETINGROOM, 30, DayOfWeek.NONE, 5))
     println(ans1)
     val ans2 = rq.bookRoom(Room(Place.KRONVERSKY, Pair(10, 0), 30, Month.MARCH, 1311, RoomType.MEETINGROOM, 30, DayOfWeek.NONE, 5))
