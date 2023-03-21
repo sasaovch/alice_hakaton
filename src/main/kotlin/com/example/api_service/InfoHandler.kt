@@ -1,18 +1,22 @@
 import com.example.api_service.LoggingInterceptor
 import com.example.api_service.RoomInfoApi
 import com.example.constants.Constants
+import com.example.cookie.CookieHandler
 import com.example.models.Place
 import com.example.models.RoomType
 import com.example.models.ScheduleParser
 import com.example.models.ScheduledRoom
+import okhttp3.CookieJar
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
-class InfoHandler(IsuApCookie: String) {
+class InfoHandler(cookies : CookieHandler) {
+    private val cookieStore = cookies.cookieStore
+    private val cookieJar = cookies.cookies
 
-    private val isuApCookie: String = IsuApCookie
+    private val isuApCookie: String = ""
     private var pRequest: String = "PLUGIN="
     var pInstance: String = ""
 
@@ -24,7 +28,7 @@ class InfoHandler(IsuApCookie: String) {
         pRequest = "PLUGIN=${s}"
     }
 
-    private var client = OkHttpClient.Builder().addInterceptor(LoggingInterceptor()).followRedirects(true)
+    private var client = OkHttpClient.Builder().cookieJar(cookieJar).addInterceptor(LoggingInterceptor()).followRedirects(true)
         .followSslRedirects(true).build()
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://isu.ifmo.ru/")
@@ -110,7 +114,7 @@ class InfoHandler(IsuApCookie: String) {
     }
 
     fun checkInstance() {
-        val cl = OkHttpClient.Builder().addInterceptor(LoggingInterceptor()).followRedirects(false)
+        val cl = OkHttpClient.Builder().cookieJar(cookieJar).addInterceptor(LoggingInterceptor()).followRedirects(false)
             .followSslRedirects(false).build()
         val rf = Retrofit.Builder()
             .baseUrl("https://isu.ifmo.ru/")

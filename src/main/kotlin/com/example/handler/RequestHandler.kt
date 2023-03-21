@@ -13,30 +13,31 @@ import java.time.LocalDate
 import java.time.Month
 
 
-class RequestHandler {
-    val cookies = CookieHandler()
-    lateinit var infoHandler: InfoHandler
-    lateinit var phone: String
+object RequestHandler {
+    var UsernameToCookies = HashMap<String, CookieHandler>()
+    var UserToPInstance = HashMap<String, String>()
 
-    private fun setPhone(phone : String) : Boolean {
-        if(!"^[8].{10}\$".toRegex().matches(phone)) return false
-        this.phone = "+7 ("
-        this.phone += phone.substring(1, 4) + ") "
-        this.phone += phone.substring(4)
-        println(this.phone)
-        return true
+    private fun setPhone(phone: String): String {
+        if (!"^[8].{10}\$".toRegex().matches(phone)) return ""
+        var newPhone = ""
+        newPhone = "+7 ("
+        newPhone += phone.substring(1, 4) + ") "
+        newPhone += phone.substring(4)
+        println(newPhone)
+        return newPhone
     }
-    fun auth(login: String, password: String, phone: String): Boolean {
-        if(!setPhone(phone)) return false
-        val au = AuthorizationHandler(cookies)
-        val IsuApCookie = au.loginAndGetApCookie(login, password)
-        if (IsuApCookie == "") {
-            return false
-        }
-        infoHandler = InfoHandler("ISU_AP_COOKIE=$IsuApCookie")
-        infoHandler.checkInstance()
 
-        return true
+    fun auth(user: User): User {
+        var newPhone = setPhone(user.phone)
+        if (newPhone == "") return User("", "", "")
+        val cookies = CookieHandler()
+        val au = AuthorizationHandler(cookies)
+        val IsuApCookie = au.loginAndGetApCookie(user.login, user.password)
+        if (IsuApCookie == "") {
+            return User("", "", "")
+        }
+        UsernameToCookies[user.login] = cookies
+        return User(user.login, user.password, newPhone)
     }
 
     private fun addDurationToStart(room: Room): Pair<Int, Int> {
@@ -51,7 +52,11 @@ class RequestHandler {
         }
     }
 
-    fun getFreeRooms(room: Room): List<Room> {
+    fun getFreeRooms(room: Room, user: User): List<Room> {
+        val cookies = UsernameToCookies[user.login]
+        val infoHandler = InfoHandler(cookies!!)
+        infoHandler.checkInstance()
+        UserToPInstance[user.login] = infoHandler.pInstance
         val begin = convertTimeToHHMMFormat(room.time!!)
         val endTime: Pair<Int, Int> = addDurationToStart(room)
         val end = convertTimeToHHMMFormat(endTime)
@@ -75,15 +80,17 @@ class RequestHandler {
         }
     }
 
-    private lateinit var bookingHandler: BookingHandler
-    fun bookRoom(room: Room): Boolean {
-        bookingHandler = BookingHandler(cookies, infoHandler.pInstance)
+    fun bookRoom(room: Room, user: User): Boolean {
+
+        val cookies = UsernameToCookies[user.login]
+        val bookingHandler = BookingHandler(cookies!!, UserToPInstance[user.login]!!)
         val begin = convertTimeToHHMMFormat(room.time!!)
         val endTime: Pair<Int, Int> = addDurationToStart(room)
         val end = convertTimeToHHMMFormat(endTime)
         val dateString = convertDateToDDMMYYYYFormat(room.day!!, room.month!!)
-
-        return bookingHandler.book(room.roomId!!, dateString, begin, end, room.type, room.place!!, phone)
+        println(begin)
+        println(end)
+        return bookingHandler.book(room.roomId!!, dateString, begin, end, room.type, room.place!!, user.phone)
 
 
     }

@@ -680,7 +680,7 @@ class MainScenario(
     }
 
     private fun createRequestToBookRoom(roomToBook: Room, reactions: Reactions, request: BotRequest) {
-        val listOfRoom = requestHandler.getFreeRooms(roomToBook)
+        val listOfRoom = requestHandler.getFreeRooms(roomToBook, user = User("", "", ""))
         if (listOfRoom.isEmpty()) {
             reactions.say(
                 "Не удалось забронировать ${roomToBook.type.getParentCase()}, так как нет свободного помещения"

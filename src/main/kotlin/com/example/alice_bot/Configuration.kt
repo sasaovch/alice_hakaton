@@ -7,7 +7,7 @@ import com.justai.jaicf.channel.yandexalice.AliceChannel
 import com.justai.jaicf.channel.yandexalice.activator.AliceIntentActivator
 
 val skill = BotEngine(
-    model = MainScenario(RequestHandler()).model,
+    model = MainScenario(RequestHandler).model,
     activators = arrayOf(
         AliceIntentActivator,
         RegexActivator
