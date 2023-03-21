@@ -255,7 +255,7 @@ class MainScenario(
                     val list = getListRoom(reactions, request)
 //                    saveToSession("state", "say", reactions, request)
 
-                    if (list.filter { it.roomId.equals(roomId) }.isNotEmpty()) {
+                    if (list.filter { it.roomId!!.equals(roomId) }.isNotEmpty()) {
                         println("Success")
                         saveToSession(emptyMap(), reactions, request)
                         if (bookRoom(list.first { it.roomId == roomId }, reactions, request)) {

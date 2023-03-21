@@ -357,7 +357,6 @@ class BookingHandler(cookies: CookieHandler, private val pInstance: String) {
         val request = retrofitIsu.create(BookingApi::class.java)
         val call = request.getBookingHtml(createBookingHtmlParams(pInstance))
         bookingHtml = call.execute().body()?.string()!!
-        println(bookingHtml)
     }
 
     private fun getListOfF(html: String): String {
@@ -512,6 +511,7 @@ class BookingHandler(cookies: CookieHandler, private val pInstance: String) {
         var call = request.book(result)
 
         val responce = call.execute()
+        println(responce.code())
         if (responce.code() == 302 && bookType == "PASS_REQUEST") {
             return true
         }

@@ -23,11 +23,11 @@ class RequestHandler {
         this.phone = "+7 ("
         this.phone += phone.substring(1, 4) + ") "
         this.phone += phone.substring(4)
+        println(this.phone)
         return true
     }
     fun auth(login: String, password: String, phone: String): Boolean {
         if(!setPhone(phone)) return false
-        this.phone = phone
         val au = AuthorizationHandler(cookies)
         val IsuApCookie = au.loginAndGetApCookie(login, password)
         if (IsuApCookie == "") {
