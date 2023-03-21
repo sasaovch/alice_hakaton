@@ -202,32 +202,6 @@ class MainScenario(
                 }
             }
 
-            state("ask_password") {
-                activators {
-                    intent("ask_password")
-                }
-
-                action {
-                    val password = activator.alice?.slots?.get("password")?.value
-                    println(password)
-                    saveToApplication("password", password.toString(), reactions, request)
-                    reactions.go("/say_phone")
-                }
-            }
-
-            state("ask_login") {
-                activators {
-                    intent("ask_login")
-                }
-
-                action {
-                    val login = activator.alice?.slots?.get("login")?.value
-                    println(login)
-                    saveToApplication("login", login.toString(), reactions, request)
-                    reactions.go("/say_password")
-                }
-            }
-
             state("ask_phone") {
                 activators {
                     intent("ask_phone")
@@ -235,9 +209,38 @@ class MainScenario(
 
                 action {
                     val phone = activator.alice?.slots?.get("phone")?.value
-                    println(phone)
-                    saveToApplication("phone", phone.toString(), reactions, request)
+                    println("Phone ${phone}")
+                    saveToApplication("phone", removeQuotations(phone.toString()), reactions, request)
                     reactions.go("/main_book")
+                }
+            }
+
+            state("ask_password") {
+                activators {
+                    intent("ask_password")
+                }
+
+                action {
+                    val password = activator.alice?.slots?.get("password")?.value
+                    println("Paswwor ${password}")
+                    saveToApplication("password", removeQuotations(password.toString()), reactions, request)
+                    saveToSession(emptyMap(), reactions, request)
+                    reactions.go("/main_book/say_phone")
+                }
+            }
+
+            state("ask_login") {
+                activators {
+                    intent("ask_login")
+                    regex("[0-9]{6}")
+                }
+
+                action {
+                    val login = activator.alice?.slots?.get("login")?.value
+                    println("Login ${login}")
+                    saveToApplication("login", login.toString(), reactions, request)
+                    saveToSession(emptyMap(), reactions, request)
+                    reactions.go("/main_book/say_password")
                 }
             }
 
@@ -254,11 +257,20 @@ class MainScenario(
 
                     if (list.filter { it.roomId.equals(roomId) }.isNotEmpty()) {
                         println("Success")
-//                        reactions.go("/main_book")
-                        bookRoom(list.first { it.roomId == roomId }, reactions, request)
+                        saveToSession(emptyMap(), reactions, request)
+                        if (bookRoom(list.first { it.roomId == roomId }, reactions, request)) {
+                            saveToApplication(list.first { it.roomId == roomId }, reactions, request)
+                            reactions.go("/main_book/congratulations")
+                        }
                     } else {
                         reactions.go("/main_book/problem_id")
                     }
+                }
+            }
+
+            state("congratulations") {
+                action {
+                    reactions.say("Аудиторию забронирована")
                 }
             }
 
@@ -326,6 +338,25 @@ class MainScenario(
                 }
             }
 
+            state("say_password") {
+                action {
+                    reactions.sayRandom(
+                        "Пожалуйста, уточните свой пароль от ису. Это нужно для системы регистрации"
+                    )
+                    reactions.changeState("/main_book/ask_password")
+                }
+            }
+
+            state("say_phone") {
+                action {
+                    reactions.sayRandom(
+                        "Пожалуйста, уточните свой номер телефона от ису. Это нужно для системы регистрации"
+                    )
+                    reactions.changeState("/main_book/ask_phone")
+                }
+            }
+
+
 
             state("say_place") {
                 action {
@@ -378,7 +409,7 @@ class MainScenario(
                                 reactions.buttons("8 20")
                                 reactions.buttons("10 00")
                                 reactions.buttons("11 40")
-                                reactions.buttons("13 00")
+                                reactions.buttons("13 30")
                                 reactions.buttons("15 20")
                                 reactions.buttons("17 00")
                                 reactions.buttons("18 40")
@@ -621,10 +652,10 @@ class MainScenario(
         }
         saveToSession(mapToSaveSession, reactions, request)
         if (mapToSaveSession["state"].isNullOrEmpty()) {
-//            val user = checkUserDateFromAppState(reactions, request)
-//            if (user.login != "pass") {
+            val user = checkUserDateFromAppState(reactions, request)
+            if (user.login != "pass") {
                 createRequestToBookRoom(handleRequest.roomList[0], reactions, request)
-//            }
+            }
         } else {
             reactions.go(mapToSaveSession["state"]!!)
         }
@@ -634,15 +665,18 @@ class MainScenario(
         val loginR = request.alice?.state?.user?.get("login")
         val passworR = request.alice?.state?.user?.get("password")
         val phone = request.alice?.state?.user?.get("phone")
-        if (loginR == null) {
+        if ((loginR == null || loginR.content == "null")
+            || passworR == null || passworR.content == "null"
+            || phone == null || phone.content == "null") {
             reactions.go("say_login")
             return User("pass", "pass", "pass")
         } else {
             return User(loginR.content, passworR?.content?: "", phone?.content?: "")
         }
     }
-    private fun bookRoom(roomToBook: Room, reactions: Reactions, request: BotRequest) {
-        requestHandler.bookRoom(roomToBook)
+    private fun bookRoom(roomToBook: Room, reactions: Reactions, request: BotRequest): Boolean {
+//        requestHandler.bookRoom(roomToBook)
+        return true
     }
 
     private fun createRequestToBookRoom(roomToBook: Room, reactions: Reactions, request: BotRequest) {
@@ -727,16 +761,12 @@ class MainScenario(
     }
 
     private fun saveToApplication(parameter: String, value: String, reactions: Reactions, request: BotRequest) {
-        val mapJson = HashMap<String, JsonElement>()
-        val objectJ = request.alice?.state?.user
         val par = JsonPrimitive(value)
-        mapJson[parameter] = par
-//        if (!objectJ.isNullOrEmpty()) for (key in objectJ.keys) {
-//            if (!mapJson.containsKey(key)) {
-//                mapJson[key] = objectJ[key]!!
-//            }
-//        }
-//        val json = JsonObject(mapJson)
         reactions.alice?.updateUserState(parameter, par)
+    }
+
+    private fun saveToApplication(room: Room, reactions: Reactions, request: BotRequest) {
+        val strJson = Gson().toJson(room)
+        reactions.alice?.updateUserState("room", JsonPrimitive(strJson))
     }
 }
