@@ -12,6 +12,7 @@ import com.justai.jaicf.channel.yandexalice.alice
 import com.justai.jaicf.channel.yandexalice.api.alice
 import com.justai.jaicf.channel.yandexalice.model.AliceEvent
 import com.justai.jaicf.context.ActivatorContext
+import com.justai.jaicf.helpers.ssml.breakS
 import com.justai.jaicf.model.scenario.Scenario
 import com.justai.jaicf.reactions.Reactions
 import kotlinx.serialization.json.JsonElement
@@ -21,8 +22,6 @@ import kotlinx.serialization.json.content
 import java.time.LocalDate
 import java.time.Month
 
-//FIXME: time 32:32
-//FIXME: 8 20
 class MainScenario(
     private val requestHandler: RequestHandler
 ) : Scenario() {
@@ -53,12 +52,12 @@ class MainScenario(
                 val booked = getRoomsFromApplicatoinState(request)
                 if (booked.isNotEmpty()) {
                     if (booked.size == 1) {
-                        reactions.say("У вас забронирована ${booked[0].type.getNominativeCase()} на ${booked[0].place!!.getRepositionalCase()} " +
+                        reactions.say("У вас забронирована ${booked[0].type.getNominativeCase()} ${booked[0].roomId} на ${booked[0].place!!.getRepositionalCase()} " +
                                 "в ${convertTimeToHHMMFormat(booked[0].hour!!, booked[0].minute!!)} на ${booked[0].place!!.getRepositionalCase()}")
                     } else {
                         reactions.say("У вас есть ${booked.size} забронированных помещений\n")
                         booked.sortedWith(RoomComparator()).forEach {
-                            reactions.say("${it.type.getNominativeCaseWithCapL()} на ${it.place!!.getRepositionalCase()} на ${it.day}.${it.month?.value} в ${convertTimeToHHMMFormat(it.hour!!, it.minute!!)}")
+                            reactions.say("${it.type.getNominativeCaseWithCapL()} ${it.roomId} на ${it.place!!.getRepositionalCase()} на ${it.day}.${it.month?.value} в ${convertTimeToHHMMFormat(it.hour!!, it.minute!!)}")
                         }
                     }
                 }
@@ -129,7 +128,6 @@ class MainScenario(
                     reactions.go("/main_book")
                 }
             }
-//FIXME: check bellow
             state("ask_date") {
                 activators {
                     intent("ask_date")
@@ -157,7 +155,7 @@ class MainScenario(
                     } else {
 //                        reactions.say("Неправильная дата. Мы можем забронировать только на будущую дату не дальше семи дней.")
 //                            saveToSession("state", "say_date", reactions, request)
-                        reactions.say("Неправильная дата. Мы можем забронировать только на будущую дату не дальше семи дней. Повторите, пожалуйста, на какую дату забронировать")
+                        reactions.say("Мы можем забронировать только на будущую дату не дальше семи дней. Повторите, пожалуйста, на какую дату забронировать.")
                         saveToSession("state", "say_date", reactions, request)
                     }
                     reactions.go("/main_book")
@@ -394,7 +392,7 @@ class MainScenario(
                             }
                             "say_time_for_room" -> {
                                 saveToSession("state", "say_type", reactions, request)
-                                reactions.go("/main_book/say_type")
+                                reactions.go("/main_book/say_date")
                             }
                             else -> reactions.say("Вы еще не начали бронировать помещение")
                         }
@@ -434,7 +432,7 @@ class MainScenario(
             state("say_place") {
                 action {
                     reactions.sayRandom(
-                        "Пожалуйста, уточните корпус",
+                        "Пожалуйста, уточните корпус.",
                         "Хорошо, уточните корпус, который вас интересует",
                         "Хорошо, какой корпус вы хотите рассмотреть?"
                     )
@@ -509,8 +507,8 @@ class MainScenario(
             state("say_type") {
                 action {
                     reactions.sayRandom(
-                        "Пожалуйста, уточните вам нужна аудитория или переговорка",
-                        "Подскажите, пожалуйста, вам нужна аудитория или переговорка"
+                        "Пожалуйста, уточните вам нужна аудитория или переговорка.",
+                        "Подскажите, пожалуйста, вам нужна аудитория или переговорка."
                     )
                     reactions.buttons("Аудитория")
                     reactions.buttons("Переговорка")
@@ -522,7 +520,7 @@ class MainScenario(
                 action {
                     saveToSession(emptyMap(), reactions, request)
                     reactions.sayRandom(
-                        "Неправильный адрес. Можно выбрать Ломоносова или Кронверкский"
+                        "Неправильный адрес. Можно выбрать Ломоносова или Кронверкский."
                     )
                     reactions.buttons("Ломоносова")
                     reactions.buttons("Кронверкский")
@@ -533,21 +531,61 @@ class MainScenario(
             state("problem_time") {
                 action {
                     saveToSession(emptyMap(), reactions, request)
-                    reactions.sayRandom("Неверное время. Пожалуйста, скажите числом час и минуты")
+                    reactions.sayRandom("Неверное время. Пожалуйста, скажите числом час и минуты.")
                     reactions.changeState("/main_book")
                 }
             }
             state("problem_date") {
                 action {
                     saveToSession(emptyMap(), reactions, request)
-                    reactions.sayRandom("Вы указали неправильную дату. Пожалуйста, скажите месяц и число")
+                    reactions.sayRandom("Вы указали неправильную дату. Пожалуйста, скажите месяц и число.")
                     reactions.changeState("/main_book")
                 }
             }
             state("problem_type") {
                 action {
                     saveToSession(emptyMap(), reactions, request)
-                    reactions.sayRandom("Неверный тип помещения. Можно забронировать аудиторию или переговорку")
+                    reactions.sayRandom("Неверный тип помещения. Можно забронировать аудиторию или переговорку.")
+                    reactions.buttons("Аудитория")
+                    reactions.buttons("Переговорка")
+                    reactions.buttons("Назад")
+                    reactions.changeState("/main_book")
+                }
+            }
+            state("problem_login") {
+                action {
+                    saveToSession(emptyMap(), reactions, request)
+                    reactions.sayRandom("Неверный формат логин. Введите слово логин и затем сам логин.")
+                    reactions.buttons("Аудитория")
+                    reactions.buttons("Переговорка")
+                    reactions.buttons("Назад")
+                    reactions.changeState("/main_book")
+                }
+            }
+            state("problem_password") {
+                action {
+                    saveToSession(emptyMap(), reactions, request)
+                    reactions.sayRandom("Неверный формат пароля. Введите слово пароль и затем сам пароль.")
+                    reactions.buttons("Аудитория")
+                    reactions.buttons("Переговорка")
+                    reactions.buttons("Назад")
+                    reactions.changeState("/main_book")
+                }
+            }
+            state("problem_phone") {
+                action {
+                    saveToSession(emptyMap(), reactions, request)
+                    reactions.sayRandom("Неверный формат ввода номера. Введите слово номер и затем сам номер.")
+                    reactions.buttons("Аудитория")
+                    reactions.buttons("Переговорка")
+                    reactions.buttons("Назад")
+                    reactions.changeState("/main_book")
+                }
+            }
+            state("problem_time_room") {
+                action {
+                    saveToSession(emptyMap(), reactions, request)
+                    reactions.sayRandom("Неверный формат времени. Скажите часы потом минуты.")
                     reactions.buttons("Аудитория")
                     reactions.buttons("Переговорка")
                     reactions.buttons("Назад")
@@ -563,7 +601,7 @@ class MainScenario(
             if (state != "") {
                 goToPreviousState(reactions, state)
             } else {
-                reactions.say("К сожалению, мы вас не поняли. Для начала бронирования скажите забронировать")
+                reactions.say("К сожалению, мы вас не поняли. Для начала бронирования скажите забронировать.")
             }
         }
     }
@@ -594,6 +632,10 @@ class MainScenario(
             "say_time" -> reactions.go("/main_book/problem_time")
             "say_date" -> reactions.go("/main_book/problem_date")
             "say_type" -> reactions.go("/main_book/problem_type")
+            "say_time_for_room" -> reactions.go("/main_book/problem_time_room")
+            "say_login" -> reactions.go("/main_book/problem_login")
+            "say_password" -> reactions.go("/main_book/problem_password")
+            "say_phone" -> reactions.go("/main_book/problem_phone")
         }
     }
 
@@ -835,10 +877,10 @@ class MainScenario(
             reactions.go("say_login")
             return User("", "", "")
         } else {
-            reactions.say("Подождите. Идет авторизация...")
-//            return User(loginR.content, passworR.content, phone.content)
+//            reactions.say("Подождите. Идет авторизация...")
+            return User(loginR.content, passworR.content, phone.content)
 //            reactions
-            return requestHandler.auth(User(loginR.content, passworR.content, phone.content))
+//            return requestHandler.auth(User(loginR.content, passworR.content, phone.content))
         }
     }
 
