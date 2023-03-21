@@ -16,10 +16,13 @@ slots:
     today:
         type: TodayAndTomorrow
         source: $TodayAndTomorrow
+    number:
+        type: YANDEX.NUMBER
+        source: $NumberMember
 
 root:
     %lemma
-    $BookWord [((в | на)? [$DayNumber $Month])? ($Type)? ((в | на)? $Time)? ((в | на)? $Where)? ((на)? $TodayAndTomorrow)?]
+    $BookWord [((в | на)? [$DayNumber $Month])? ($Type)? ((в | на)? $Time)? ((в | на)? $Where)? ((на)? $Today)? ((на)? $NumberMember)?]
 
 $BookWord:
     %lemma
@@ -38,7 +41,9 @@ $Where:
 $Type:
     %lemma
     $PlaceType
-
 $Today:
     %lemma
     $TodayAndTomorrow
+$NumberMember:
+    %lemma
+    $YANDEX.NUMBER (человек | мест)

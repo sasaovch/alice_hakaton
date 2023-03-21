@@ -38,6 +38,8 @@ entity TodayAndTomorrow:
             сегодня
         tomorrow:
             завтра
+        aftertomorrow:
+            послезавтра
 
 entity BookTimeMonth:
     lemma: true
@@ -66,3 +68,9 @@ entity BookTimeMonth:
             ноябрь
         december:
             декабрь
+
+entity NumberMembers:
+    lemma: true
+    values:
+        exact:
+            $YANDEX.NUMBER (человек | персон | мест)?

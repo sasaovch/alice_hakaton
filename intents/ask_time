@@ -13,11 +13,18 @@ slots:
     place:
         type: ItmoPlace
         source: $Where
+    today:
+        type: TodayAndTomorrow
+        source: $TodayAndTomorrow
+    number:
+        type: YANDEX.NUMBER
+        source: $NumberMember
+
 
 
 root:
     %lemma
-    (на | в)? $Time [((в | на)? [$DayNumber $Month])? ($Type)? ((в | на)? $Where)?]
+    (на | в)? $Time [((в | на)? [$DayNumber $Month])? ($Type)? ((в | на)? $Where)? ((на)? $TodayAndTomorrow)? ((на)? $NumberMember)?]
 
 $Time:
     $YANDEX.NUMBER $YANDEX.NUMBER
@@ -30,3 +37,9 @@ $Where:
     $ItmoPlace
 $Type:
     $PlaceType
+$Today:
+    %lemma
+    $TodayAndTomorrow
+$NumberMember:
+    %lemma
+    $YANDEX.NUMBER (человек | мест | людей)
