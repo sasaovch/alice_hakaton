@@ -1,11 +1,14 @@
-package com.example.booking
+package booking
 
-import booking.BookingApi
+import com.example.api_service.LoggingInterceptor
+import com.example.booking.BookingApi
+import com.example.constants.Constants
+import com.example.cookie.CookieHandler
+import com.example.models.Place
+import com.example.models.RoomType
 import com.example.util.EncodingInterceptor
-import com.example.util.LoggingInterceptor
-import cookies.CookieHandler
 import okhttp3.OkHttpClient
-import org.apache.commons.text.StringEscapeUtils
+import org.apache.commons.text.StringEscapeUtils.unescapeHtml4
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
@@ -14,8 +17,9 @@ import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.util.*
 
+
 class BookingHandler(cookies: CookieHandler, private val pInstance: String) {
-    private val bookingParams = listOf<String>(
+    private val bookingParamsCreate = listOf<String>(
         "p_flow_id",
         "p_flow_step_id",
         "p_instance",
@@ -162,6 +166,154 @@ class BookingHandler(cookies: CookieHandler, private val pInstance: String) {
         "p_md5_checksum",
         "p_page_checksum"
     )
+    private val bookingParamsBook = listOf<String>(
+        "p_flow_id",
+        "p_flow_step_id",
+        "p_instance",
+        "p_page_submission_id",
+        "p_request",
+        "p_arg_names",
+        "p_t01",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t02",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t03",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t04",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t05",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t06",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t07",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t08",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t09",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t10",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t11",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t12",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t13",
+        "p_arg_names",
+        "p_t14",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t15",
+        "p_arg_names",
+        "p_t16",
+        "p_arg_names",
+        "p_t17",
+        "p_arg_names",
+        "p_t18",
+        "p_arg_names",
+        "p_t19",
+        "p_arg_names",
+        "p_t20",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t21",
+        "p_arg_names",
+        "p_t22",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t23",
+        "p_arg_names",
+        "p_t24",
+        "p_arg_names",
+        "p_t25",
+        "p_arg_names",
+        "p_t26",
+        "p_arg_names",
+        "p_t27",
+        "p_arg_names",
+        "p_t28",
+        "p_arg_names",
+        "p_t29",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t30",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t31",
+        "p_arg_names",
+        "p_t32",
+        "p_arg_names",
+        "p_t33",
+        "p_arg_names",
+        "p_t34",
+        "p_arg_names",
+        "p_t35",
+        "p_arg_names",
+        "p_t36",
+        "p_arg_names",
+        "p_arg_names",
+        "p_t38",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t39",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t40",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t41",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t42",
+        "p_arg_checksums",
+        "p_arg_names",
+        "p_t43",
+        "p_arg_names",
+        "p_t44",
+        "p_arg_names",
+        "p_t45",
+        "p_arg_names",
+        "p_t46",
+        "p_arg_names",
+        "p_t47",
+        "p_arg_names",
+        "p_t48",
+        "p_arg_names",
+        "p_t49",
+        "p_arg_checksums",
+        "f44",
+        "p_arg_names",
+        "p_t50",
+        "p_arg_names",
+        "p_t51",
+        "p_arg_names",
+        "p_t52",
+        "p_arg_names",
+        "p_t53",
+        "p_arg_names",
+        "p_t54",
+        "p_arg_names",
+        "p_t55",
+        "p_arg_names",
+        "p_t56",
+        "p_arg_names",
+        "p_t57",
+        "p_arg_names",
+        "p_t58",
+        "p_md5_checksum",
+        "p_page_checksum"
+    )
     private val cookieStore = cookies.cookieStore
     private val cookieJar = cookies.cookies
     private var client =
@@ -205,14 +357,13 @@ class BookingHandler(cookies: CookieHandler, private val pInstance: String) {
         val request = retrofitIsu.create(BookingApi::class.java)
         val call = request.getBookingHtml(createBookingHtmlParams(pInstance))
         bookingHtml = call.execute().body()?.string()!!
-        //println(bookingHtml)
     }
 
     private fun getListOfF(html: String): String {
         var res = ""
         var bufHtml = html
-        while ("(?<=\")f4[2-4]\".*".toRegex().find(bufHtml, 0) != null) {
-            bufHtml = "(?<=\")f4[2-4]\".*".toRegex().find(bufHtml, 0)?.value!!
+        while ("(?<=\")f44\".*".toRegex().find(bufHtml, 0) != null) {
+            bufHtml = "(?<=\")f44\".*".toRegex().find(bufHtml, 0)?.value!!
             val variable = bufHtml.substring(0, 3)
             val value = "(?<=value=\").*?(?=\")".toRegex().find(bufHtml, 0)?.value!!
             if (res == "") res = "$res$variable=$value"
@@ -221,14 +372,50 @@ class BookingHandler(cookies: CookieHandler, private val pInstance: String) {
         }
         println(res)
         return res
-        //return "(?<=f44\" value=\").*?(?=\")".toRegex().findAll(html, 0).map { it.value }.toMutableList()
     }
 
-    fun test(roomId: Int, date: String, begin: String, end: String) {
+    fun book(
+        roomNum: Int,
+        date: String,
+        begin: String,
+        end: String,
+        roomType: RoomType,
+        place: Place,
+        phone: String
+    ): Boolean {
+        val roomId = Constants.numToId(roomNum)
+        println(roomId)
         getBookingHtml()
         val bufHtml = (getAudDevicesHTML(roomId))
         val listOfFParams = getListOfF(bufHtml!!)
-        sendBookRequest(roomId, date, begin, end, listOfFParams, "NUMBER")
+        val res1 = sendBookRequest(
+            roomId,
+            date,
+            begin,
+            end,
+            listOfFParams,
+            phone,
+            roomType,
+            place,
+            bookingParamsCreate,
+            "CREATE"
+        )
+
+        if (!res1) return res1
+        val res2 = sendBookRequest(
+            roomId,
+            date,
+            begin,
+            end,
+            listOfFParams,
+            phone,
+            roomType,
+            place,
+            bookingParamsBook,
+            "PASS_REQUEST"
+        )
+        return res2
+
     }
 
     private fun sendBookRequest(
@@ -237,13 +424,17 @@ class BookingHandler(cookies: CookieHandler, private val pInstance: String) {
         begin: String,
         end: String,
         listOfFParams: String,
-        phone: String
-    ) {
+        phone: String,
+        type: RoomType,
+        place: Place,
+        bookingParams: List<String>,
+        bookType: String
+    ): Boolean {
         val request = retrofitIsu.create(BookingApi::class.java)
         val stringBuilder = StringBuilder()
         val localDate = LocalDateTime.now()
         val strDate = localDate.toString().split('T')[0].replace("-", "") + "0000"
-        val pattern = "dd.mm.yyyy"
+        val pattern = "dd.MM.yyyy"
         val simpleDateFormat = SimpleDateFormat(pattern)
         val dateWithDots = simpleDateFormat.format(Date())
         println(strDate)
@@ -251,7 +442,7 @@ class BookingHandler(cookies: CookieHandler, private val pInstance: String) {
             if (stringBuilder.isNotEmpty())
                 stringBuilder.append("&")
             when (param) {
-                "p_request" -> stringBuilder.append("$param=${encode("CREATE")}") //set PASS_REQUEST to book
+                "p_request" -> stringBuilder.append("$param=${encode(bookType)}") //set PASS_REQUEST to book
                 "p_t15" -> stringBuilder.append("$param=${encode(date)}")
                 "p_t16" -> stringBuilder.append("$param=${encode(roomId.toString())}")
                 "p_t23" -> stringBuilder.append("$param=${encode("BOOKED_BY_ALICE_SKILL")}")
@@ -259,11 +450,18 @@ class BookingHandler(cookies: CookieHandler, private val pInstance: String) {
                 "p_t27" -> stringBuilder.append("$param=${encode(end)}")
                 "p_t31" -> stringBuilder.append("$param=${encode(phone)}")
                 "p_t46" -> stringBuilder.append("$param=${encode(phone)}")
-                "p_t14" -> stringBuilder.append("$param=-603") //todo гибкий метод регистрации
+                "p_t14" -> stringBuilder.append(
+                    "$param=${
+                        Constants.TypeToTimeType[Pair(
+                            type,
+                            place
+                        )]
+                    }"
+                )
                 "p_t17" -> stringBuilder.append("$param=$strDate")
                 "p_t19" -> stringBuilder.append("$param=N")
                 "p_t21" -> stringBuilder.append("$param=${encode(roomId.toString())}")
-                "p_t28" -> stringBuilder.append("$param=3") // by default booking for 3 people
+                "p_t28" -> stringBuilder.append("$param=3")
                 "p_t32" -> {
                     stringBuilder.append("$param=")
                 }
@@ -281,28 +479,28 @@ class BookingHandler(cookies: CookieHandler, private val pInstance: String) {
                 "p_t51" -> {
                     stringBuilder.append("$param=")
                 }
-                "p_t56" -> stringBuilder.append("$param=${encode("18863,18865,18867,18871")}") //todo ,,,
-
+                "p_t56" -> {stringBuilder.append("$param=${encode(Constants.getStringOfRoomsIds(roomId))}")}
                 "f44" -> {
-                    //stringBuilder.append("f44=995&f42=&f41=996&f42=&f41=997&f44=999&f44=1150&f44=1151&f44=1152")
                     stringBuilder.append(listOfFParams)
                 }
 
-                "p_t50" -> stringBuilder.append("$param=CREATE")
+                "p_t50" -> stringBuilder.append("$param=$bookType")
                 "p_t54" -> stringBuilder.append("$param=${encode(dateWithDots)}")
-                "p_t54" -> stringBuilder.append("$param=${encode("18863,18865,18867,18871")}")
                 else -> {
-                    val prefix = ("^[\\s\\S]*?$param").toRegex().find(bookingHtml)?.value
-                    bookingHtml = bookingHtml.removePrefix(prefix!!)
+                    try {
+                        val prefix = ("^[\\s\\S]*?$param").toRegex().find(bookingHtml)?.value
+                        bookingHtml = bookingHtml.removePrefix(prefix!!)
 
-                    var value: String =
-                        ("(^[\\s\\S]*?)(?=\")".toRegex().find(bookingHtml.split("value=\"")[1], 0)?.value!!)
-                    value = StringEscapeUtils.unescapeHtml4(value)
-                    if (param == "p_flow_id") {
-                        stringBuilder.append(value)
-                    } else
-                        stringBuilder.append("${encode(param)}=${encode(value)}")
-
+                        var value: String =
+                            ("(^[\\s\\S]*?)(?=\")".toRegex().find(bookingHtml.split("value=\"")[1], 0)?.value!!)
+                        value = unescapeHtml4(value)
+                        if (param == "p_flow_id") {
+                            stringBuilder.append(value)
+                        } else
+                            stringBuilder.append("${encode(param)}=${encode(value)}")
+                    } catch(e : NullPointerException) {
+                        println(param)
+                    }
                 }
 
             }
@@ -310,13 +508,26 @@ class BookingHandler(cookies: CookieHandler, private val pInstance: String) {
 
         }
         val result = stringBuilder.toString()
-        println(result)
-        val call = request.book(result)
-        println(call.execute().code())
+        var call = request.book(result)
+
+        val responce = call.execute()
+        println(responce.code())
+        if (responce.code() == 302 && bookType == "PASS_REQUEST") {
+            return true
+        }
+
+
+        if (responce.code() == 302 && bookType == "CREATE") {
+            val url = "https://isu.ifmo.ru/pls/apex/" + responce.headers().get("LOCATION")
+            call = request.redirectHandler(url)
+            bookingHtml = call.execute().body()?.string()!!
+            return true
+        } else return false
     }
 
     private fun encode(s: String): String {
         return URLEncoder.encode(s)!!
     }
+
 
 }

@@ -1,6 +1,6 @@
 package com.example.api_service
 
-import cookies.CookieHandler
+import com.example.cookie.CookieHandler
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -9,7 +9,6 @@ import java.security.SecureRandom
 import java.util.*
 
 class AuthorizationHandler (cookies : CookieHandler) {
-    //cookieJar(new SessionCookieJar())
     private val cookieStore = cookies.cookieStore
     private val cookieJar = cookies.cookies
     private var client =
@@ -21,24 +20,23 @@ class AuthorizationHandler (cookies : CookieHandler) {
         .addConverterFactory(GsonConverterFactory.create())
         .addConverterFactory(ScalarsConverterFactory.create())
         .build()
-    private val retrofitIsu = Retrofit.Builder()
-        .baseUrl("https://isu.ifmo.ru/")
-        .client(client)
-        .addConverterFactory(GsonConverterFactory.create())
-        .addConverterFactory(ScalarsConverterFactory.create())
-        .build()
 
     fun loginAndGetApCookie(login: String, password: String): String {
-        //todo NULL HANDLING
-        val html = getLoginPage()!!
-        val regex = "<form\\s+.*?\\s+action=\"(.*?)\"".toRegex()
-        var action = regex.find(html)!!.groups[1]?.value!!
-        //Why amp;?
-        action = action.replace("amp;", "")
+        return try {
+            val html = getLoginPage()!!
 
-        login(login, password, action)
+            val regex = "<form\\s+.*?\\s+action=\"(.*?)\"".toRegex()
 
-        return getIsuApCookie()
+            var action = regex.find(html)!!.groups[1]?.value!!
+            action = action.replace("amp;", "")
+
+            login(login, password, action)
+
+            getIsuApCookie()
+        } catch(e : NullPointerException) {
+            ""
+        }
+
     }
 
     private fun getLoginPage(): String? {
@@ -53,17 +51,14 @@ class AuthorizationHandler (cookies : CookieHandler) {
         val call = request.getRoomInfo(url, login, password, "")
 
         var response = call.execute()
-        println(response.code())
         while (response.code() == 302) {
             response = request.redirectHandler(response.headers().get("LOCATION")!!).execute()
         }
     }
 
     private fun getIsuApCookie(): String {
-        //todo NULL HANDLING
-        var url = "https://isu.ifmo.ru/"
         val request = retrofitIdItmo.create(AuthorizationApi::class.java)
-        var queryNumber = 8;
+        val queryNumber = 8;
         var call = request.redirectHandler("https://isu.ifmo.ru/")
         var response = call.execute()
         for (i in 2..queryNumber) {
