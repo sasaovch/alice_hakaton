@@ -138,7 +138,7 @@ class MainScenario(
                     println(en.toString())
                     val tim = Gson().fromJson(en.toString(), TimeToBook::class.java)
                     val responseForToday = requestHandler.getTimeToBook(en.toString())
-                    if (responseForToday.error != ErrorTypeResponse.NO_TIME && responseForToday.roomList[0].hour != null && responseForToday.roomList[0].minute != null) {
+                    if (responseForToday.error != ErrorTypeResponse.NO_TIME && responseForToday.error != ErrorTypeResponse.EMPTY && responseForToday.roomList[0].hour != null && responseForToday.roomList[0].minute != null) {
                         reactions.go("/main_book")
                     } else if (responseForToday.error != ErrorTypeResponse.NO_DATE && requestHandler.isRightDateToBook(responseForToday.roomList[0].month!!, responseForToday.roomList[0].day!!)) {
                         requestHandler.isRightDateToBook(responseForToday.roomList[0].month!!, responseForToday.roomList[0].day!!)
